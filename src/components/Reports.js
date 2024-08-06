@@ -1,5 +1,19 @@
 import React, { useState } from 'react';
-import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
+import { 
+  ResponsiveContainer, 
+  LineChart, 
+  Line, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  PieChart, 
+  Pie, 
+  Cell 
+} from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -13,6 +27,7 @@ const Reports = ({ projects }) => {
 
     const projectData = projects[selectedProject];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
     const beneficiaryData = months.map(month => ({
       name: month,
       beneficiaries: Math.floor(Math.random() * 1000),

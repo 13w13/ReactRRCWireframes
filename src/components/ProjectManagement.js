@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ResponsiveContainer, TreeMap, Tooltip } from 'recharts';
+import { ResponsiveContainer, Tooltip } from 'recharts';
+import { TreeMap } from 'recharts/lib/chart/TreeMap';
 
 const ProjectManagement = ({ projects, setProjects }) => {
   const [selectedProject, setSelectedProject] = useState('');
