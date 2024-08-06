@@ -1,4 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
+
+const mockActivities = [
+  { id: 1, beneficiaryId: 'B12345', name: 'John Doe', activityType: 'Food Distribution', date: '2024-08-06', location: 'Bucharest', source: 'Store' },
+  { id: 2, beneficiaryId: 'B67890', name: 'Jane Smith', activityType: 'Health Check', date: '2024-08-06', location: 'Mobile Clinic', source: 'Medical' },
+  { id: 3, beneficiaryId: 'B54321', name: 'Maria Pop', activityType: 'Language Class', date: '2024-08-05', location: 'Constanta', source: 'EspoCRM' },
+];
 
 const ActivitiesTable = () => {
   const [activities, setActivities] = useState(mockActivities);
@@ -50,7 +56,5 @@ const ActivitiesTable = () => {
     </div>
   );
 };
-
-
 
 export default ActivitiesTable;

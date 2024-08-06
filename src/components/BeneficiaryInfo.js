@@ -1,5 +1,14 @@
 import React from 'react';
 
+const mockBeneficiary = {
+  id: 'B12345', name: 'John Doe', dateOfBirth: '1985-03-15', gender: 'Male', age: 39, nationality: 'Ukrainian',
+  familyMembers: [
+    { id: 'B12346', name: 'Jane Doe', relation: 'Spouse' },
+    { id: 'B12347', name: 'Alice Doe', relation: 'Child' },
+  ],
+  lastActivity: { type: 'Food Distribution', date: '2024-08-06', location: 'Bucharest' },
+};
+
 const BeneficiaryInfo = () => (
   <div className="p-4 bg-gray-100">
     <div className="bg-white rounded-lg shadow-md p-6">

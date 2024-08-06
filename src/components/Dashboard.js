@@ -1,5 +1,11 @@
 import React from 'react';
 
+const mockActivities = [
+  { id: 1, beneficiaryId: 'B12345', name: 'John Doe', activityType: 'Food Distribution', date: '2024-08-06', location: 'Bucharest', source: 'Store' },
+  { id: 2, beneficiaryId: 'B67890', name: 'Jane Smith', activityType: 'Health Check', date: '2024-08-06', location: 'Mobile Clinic', source: 'Medical' },
+  { id: 3, beneficiaryId: 'B54321', name: 'Maria Pop', activityType: 'Language Class', date: '2024-08-05', location: 'Constanta', source: 'EspoCRM' },
+];
+
 const Dashboard = () => (
   <div className="p-4 bg-gray-100">
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -44,6 +50,5 @@ const Dashboard = () => (
     </div>
   </div>
 );
-
 
 export default Dashboard;

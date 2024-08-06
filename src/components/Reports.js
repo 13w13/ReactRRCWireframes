@@ -1,4 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+
+const projects = {
+  SEM: [
+    { id: 'sem1', name: 'Employability support', target: 1000 },
+    { id: 'sem2', name: 'Education activities', target: 500 },
+    { id: 'sem3', name: 'Language lessons', target: 750 },
+  ],
+  Ukraine: [
+    { id: 'ukr1', name: 'Primary health services', target: 5000 },
+    { id: 'ukr2', name: 'Mental Health support', target: 2000 },
+    { id: 'ukr3', name: 'First Aid training', target: 1000 },
+  ],
+};
+
 const Reports = () => {
   const [selectedProject, setSelectedProject] = useState('SEM');
   const [startDate, setStartDate] = useState('2024-01-01');
