@@ -1,42 +1,79 @@
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 
-const mockBeneficiary = {
-  id: 'B12345', name: 'John Doe', dateOfBirth: '1985-03-15', gender: 'Male', age: 39, nationality: 'Ukrainian',
-  familyMembers: [
-    { id: 'B12346', name: 'Jane Doe', relation: 'Spouse' },
-    { id: 'B12347', name: 'Alice Doe', relation: 'Child' },
-  ],
-  lastActivity: { type: 'Food Distribution', date: '2024-08-06', location: 'Bucharest' },
-};
+const mockBeneficiaries = [
+  {
+    id: '1',
+    name: 'John Doe',
+    dateOfBirth: '1980-01-01',
+    gender: 'Male',
+    age: 42,
+    nationality: 'American',
+    familyMembers: [
+      { id: '1', name: 'Jane Doe', relation: 'Wife' },
+      { id: '2', name: 'Jack Doe', relation: 'Son' },
+    ],
+    lastActivity: { type: 'Food Distribution', date: '2024-08-06', location: 'Bucharest' },
+  },
+  {
+    id: '2',
+    name: 'Maria Smith',
+    dateOfBirth: '1990-05-15',
+    gender: 'Female',
+    age: 34,
+    nationality: 'British',
+    familyMembers: [
+      { id: '3', name: 'John Smith', relation: 'Husband' },
+    ],
+    lastActivity: { type: 'Medical Aid', date: '2024-07-20', location: 'London' },
+  },
+  // Add more beneficiaries as needed
+];
 
-const BeneficiaryInfo = () => (
-  <div className="p-4 bg-gray-100">
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Information</h2>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <p><strong>ID:</strong> {mockBeneficiary.id}</p>
-          <p><strong>Name:</strong> {mockBeneficiary.name}</p>
-          <p><strong>Date of Birth:</strong> {mockBeneficiary.dateOfBirth}</p>
-        </div>
-        <div>
-          <p><strong>Gender:</strong> {mockBeneficiary.gender}</p>
-          <p><strong>Age:</strong> {mockBeneficiary.age}</p>
-          <p><strong>Nationality:</strong> {mockBeneficiary.nationality}</p>
-        </div>
+const BeneficiaryInfo = () => {
+  const history = useHistory();
+
+  const handleRowClick = (id) => {
+    history.push(`/beneficiary/${id}`);
+  };
+
+  return (
+    <div className="p-4 bg-gray-100">
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiaries List</h2>
+        <table className="min-w-full bg-white">
+          <thead>
+            <tr>
+              <th className="py-2 px-4 border-b">ID</th>
+              <th className="py-2 px-4 border-b">Name</th>
+              <th className="py-2 px-4 border-b">Date of Birth</th>
+              <th className="py-2 px-4 border-b">Number of Family Members</th>
+              <th className="py-2 px-4 border-b">Last Activity</th>
+              <th className="py-2 px-4 border-b">Last Date</th>
+              <th className="py-2 px-4 border-b">Last Location</th>
+            </tr>
+          </thead>
+          <tbody>
+            {mockBeneficiaries.map((beneficiary) => (
+              <tr
+                key={beneficiary.id}
+                className="cursor-pointer hover:bg-gray-200"
+                onClick={() => handleRowClick(beneficiary.id)}
+              >
+                <td className="py-2 px-4 border-b">{beneficiary.id}</td>
+                <td className="py-2 px-4 border-b">{beneficiary.name}</td>
+                <td className="py-2 px-4 border-b">{beneficiary.dateOfBirth}</td>
+                <td className="py-2 px-4 border-b">{beneficiary.familyMembers.length}</td>
+                <td className="py-2 px-4 border-b">{beneficiary.lastActivity.type}</td>
+                <td className="py-2 px-4 border-b">{beneficiary.lastActivity.date}</td>
+                <td className="py-2 px-4 border-b">{beneficiary.lastActivity.location}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-      <h3 className="text-xl font-semibold mt-6 mb-2">Family Members</h3>
-      <ul>
-        {mockBeneficiary.familyMembers.map(member => (
-          <li key={member.id}>{member.name} - {member.relation}</li>
-        ))}
-      </ul>
-      <h3 className="text-xl font-semibold mt-6 mb-2">Last Activity</h3>
-      <p><strong>Type:</strong> {mockBeneficiary.lastActivity.type}</p>
-      <p><strong>Date:</strong> {mockBeneficiary.lastActivity.date}</p>
-      <p><strong>Location:</strong> {mockBeneficiary.lastActivity.location}</p>
     </div>
-  </div>
-);
+  );
+};
 
 export default BeneficiaryInfo;
