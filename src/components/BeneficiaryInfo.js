@@ -8,6 +8,7 @@ const initialBeneficiaries = [
     dateOfBirth: '1980-01-01',
     gender: 'Male',
     nationality: 'Ukrainian',
+    beneficiaryType: 'Refugee',
     familyMembers: [
       { id: 'B12346', name: 'Jane Doe', relation: 'Spouse' },
       { id: 'B12347', name: 'Alice Doe', relation: 'Child' },
@@ -18,15 +19,15 @@ const initialBeneficiaries = [
 ];
 
 const beneficiaryTemplateFields = [
-  'id', 'name', 'dateOfBirth', 'gender', 'nationality', 
+  'id', 'name', 'dateOfBirth', 'gender', 'nationality', 'beneficiaryType',
   'familyMember1Name', 'familyMember1Relation',
   'familyMember2Name', 'familyMember2Relation',
   'lastActivityType', 'lastActivityDate', 'lastActivityLocation'
 ];
 
-const BeneficiaryInfo = () => {
-  const [beneficiaries, setBeneficiaries] = useState(initialBeneficiaries);
+const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
   const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
+  const [uploadLogs, setUploadLogs] = useState([]);
 
   const handleRowClick = (beneficiary) => {
     setSelectedBeneficiary(beneficiary);
@@ -46,6 +47,11 @@ const BeneficiaryInfo = () => {
       }
     }));
     setBeneficiaries(prev => [...prev, ...newBeneficiaries]);
+    setUploadLogs(prev => [...prev, {
+      timestamp: new Date().toISOString(),
+      count: uploadedData.length,
+      status: 'Success'
+    }]);
   };
 
   return (
@@ -58,7 +64,7 @@ const BeneficiaryInfo = () => {
         dataType="Beneficiaries"
       />
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiaries List</h2>
         <table className="min-w-full bg-white">
           <thead>
@@ -68,6 +74,7 @@ const BeneficiaryInfo = () => {
               <th className="py-2 px-4 border-b">Date of Birth</th>
               <th className="py-2 px-4 border-b">Gender</th>
               <th className="py-2 px-4 border-b">Nationality</th>
+              <th className="py-2 px-4 border-b">Beneficiary Type</th>
               <th className="py-2 px-4 border-b">Last Activity</th>
             </tr>
           </thead>
@@ -83,6 +90,7 @@ const BeneficiaryInfo = () => {
                 <td className="py-2 px-4 border-b">{beneficiary.dateOfBirth}</td>
                 <td className="py-2 px-4 border-b">{beneficiary.gender}</td>
                 <td className="py-2 px-4 border-b">{beneficiary.nationality}</td>
+                <td className="py-2 px-4 border-b">{beneficiary.beneficiaryType}</td>
                 <td className="py-2 px-4 border-b">{beneficiary.lastActivity.type}</td>
               </tr>
             ))}
@@ -98,10 +106,11 @@ const BeneficiaryInfo = () => {
               <p><strong>ID:</strong> {selectedBeneficiary.id}</p>
               <p><strong>Name:</strong> {selectedBeneficiary.name}</p>
               <p><strong>Date of Birth:</strong> {selectedBeneficiary.dateOfBirth}</p>
+              <p><strong>Gender:</strong> {selectedBeneficiary.gender}</p>
             </div>
             <div>
-              <p><strong>Gender:</strong> {selectedBeneficiary.gender}</p>
               <p><strong>Nationality:</strong> {selectedBeneficiary.nationality}</p>
+              <p><strong>Beneficiary Type:</strong> {selectedBeneficiary.beneficiaryType}</p>
             </div>
           </div>
           <h3 className="text-xl font-semibold mt-4 mb-2">Family Members</h3>
@@ -116,6 +125,28 @@ const BeneficiaryInfo = () => {
           <p><strong>Location:</strong> {selectedBeneficiary.lastActivity.location}</p>
         </div>
       )}
+
+      <div className="mt-6 bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Upload Logs</h2>
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="p-2 text-left">Timestamp</th>
+              <th className="p-2 text-left">Records Count</th>
+              <th className="p-2 text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {uploadLogs.map((log, index) => (
+              <tr key={index} className="border-b">
+                <td className="p-2">{log.timestamp}</td>
+                <td className="p-2">{log.count}</td>
+                <td className="p-2">{log.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

@@ -11,8 +11,7 @@ const activityTemplateFields = [
   'beneficiaryId', 'name', 'activityType', 'date', 'location', 'source'
 ];
 
-const ActivitiesTable = () => {
-  const [activities, setActivities] = useState(initialActivities);
+const ActivitiesTable = ({ activities, setActivities }) => {
   const [newActivity, setNewActivity] = useState({
     beneficiaryId: '',
     name: '',
@@ -21,6 +20,7 @@ const ActivitiesTable = () => {
     location: '',
     source: ''
   });
+  const [uploadLogs, setUploadLogs] = useState([]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -49,6 +49,11 @@ const ActivitiesTable = () => {
       ...activity
     }));
     setActivities(prev => [...prev, ...newActivities]);
+    setUploadLogs(prev => [...prev, {
+      timestamp: new Date().toISOString(),
+      count: uploadedData.length,
+      status: 'Success'
+    }]);
   };
 
   return (
@@ -115,7 +120,7 @@ const ActivitiesTable = () => {
         <button onClick={handleAddActivity} className="bg-blue-500 text-white px-4 py-2 rounded">Add Activity</button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Activities List</h2>
         <table className="w-full">
           <thead>
@@ -137,6 +142,28 @@ const ActivitiesTable = () => {
                 <td className="p-2">{activity.date}</td>
                 <td className="p-2">{activity.location}</td>
                 <td className="p-2">{activity.source}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Upload Logs</h2>
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="p-2 text-left">Timestamp</th>
+              <th className="p-2 text-left">Records Count</th>
+              <th className="p-2 text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {uploadLogs.map((log, index) => (
+              <tr key={index} className="border-b">
+                <td className="p-2">{log.timestamp}</td>
+                <td className="p-2">{log.count}</td>
+                <td className="p-2">{log.status}</td>
               </tr>
             ))}
           </tbody>

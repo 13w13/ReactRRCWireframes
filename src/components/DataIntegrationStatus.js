@@ -12,11 +12,6 @@ const mockSyncLogs = [
   { id: 3, timestamp: '2024-08-04 18:45:00', source: 'Humanity Concept Store', action: 'Sync', status: 'Failed', details: 'Connection timeout' },
 ];
 
-const mockUploadLogs = [
-  { id: 1, timestamp: '2024-08-06 10:00:00', user: 'John Doe', action: 'Upload', status: 'Success', details: 'Uploaded beneficiaries.xlsx' },
-  { id: 2, timestamp: '2024-08-05 16:45:00', user: 'Jane Smith', action: 'Upload', status: 'Failed', details: 'Invalid file format' },
-];
-
 const DataIntegrationStatus = () => {
   const [activeTab, setActiveTab] = useState('status');
 
@@ -36,12 +31,6 @@ const DataIntegrationStatus = () => {
             onClick={() => setActiveTab('syncLogs')}
           >
             Sync Logs
-          </button>
-          <button
-            className={`px-4 py-2 rounded ${activeTab === 'uploadLogs' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-            onClick={() => setActiveTab('uploadLogs')}
-          >
-            Upload Logs
           </button>
         </div>
         
@@ -91,38 +80,6 @@ const DataIntegrationStatus = () => {
                   <tr key={log.id} className="border-b">
                     <td className="p-2">{log.timestamp}</td>
                     <td className="p-2">{log.source}</td>
-                    <td className="p-2">{log.action}</td>
-                    <td className="p-2">
-                      <span className={`px-2 py-1 rounded ${log.status === 'Success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-                        {log.status}
-                      </span>
-                    </td>
-                    <td className="p-2">{log.details}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {activeTab === 'uploadLogs' && (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Upload Logs</h2>
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="p-2 text-left">Timestamp</th>
-                  <th className="p-2 text-left">User</th>
-                  <th className="p-2 text-left">Action</th>
-                  <th className="p-2 text-left">Status</th>
-                  <th className="p-2 text-left">Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockUploadLogs.map((log) => (
-                  <tr key={log.id} className="border-b">
-                    <td className="p-2">{log.timestamp}</td>
-                    <td className="p-2">{log.user}</td>
                     <td className="p-2">{log.action}</td>
                     <td className="p-2">
                       <span className={`px-2 py-1 rounded ${log.status === 'Success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>

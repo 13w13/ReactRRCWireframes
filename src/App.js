@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import Overview from './components/Overview'; 
+import Overview from './components/Overview';
 import BeneficiaryInfo from './components/BeneficiaryInfo';
 import ActivitiesTable from './components/ActivitiesTable';
 import ProjectManagement from './components/ProjectManagement';
@@ -17,6 +17,7 @@ const App = () => {
         linkedActivities: ['Livelihoods Assistance', 'Education Support'],
         locations: ['Bucharest Branch', 'Cluj-Napoca Branch'],
         beneficiaryTypes: ['Refugees', 'Internally Displaced Persons'],
+        nationalities: ['Ukrainian', 'Syrian'],
         calculationMethod: 'Count of unique beneficiaries receiving employability support'
       },
     ],
@@ -28,10 +29,33 @@ const App = () => {
         linkedActivities: ['Health consultations'],
         locations: ['Mobile Clinic', 'Refugee Camp A', 'Refugee Camp B'],
         beneficiaryTypes: ['Refugees', 'Children', 'Women', 'Elderly'],
+        nationalities: ['Ukrainian'],
         calculationMethod: 'Sum of all health consultations provided'
       },
     ],
   });
+
+  const [beneficiaries, setBeneficiaries] = useState([
+    {
+      id: 'B12345',
+      name: 'John Doe',
+      dateOfBirth: '1980-01-01',
+      gender: 'Male',
+      nationality: 'Ukrainian',
+      beneficiaryType: 'Refugee',
+      familyMembers: [
+        { id: 'B12346', name: 'Jane Doe', relation: 'Spouse' },
+        { id: 'B12347', name: 'Alice Doe', relation: 'Child' },
+      ],
+      lastActivity: { type: 'Food Distribution', date: '2024-08-06', location: 'Bucharest' },
+    },
+  ]);
+
+  const [activities, setActivities] = useState([
+    { id: 1, beneficiaryId: 'B12345', name: 'John Doe', activityType: 'Food Distribution', date: '2024-08-06', location: 'Bucharest Branch', source: 'Concept Store' },
+    { id: 2, beneficiaryId: 'B67890', name: 'Jane Smith', activityType: 'Health Check', date: '2024-08-06', location: 'Mobile Clinic', source: 'Easy Medical' },
+    { id: 3, beneficiaryId: 'B54321', name: 'Maria Pop', activityType: 'Language Class', date: '2024-08-05', location: 'Constanta Branch', source: 'EspoCRM' },
+  ]);
 
   return (
     <Router>
@@ -52,10 +76,10 @@ const App = () => {
         </div>
         <div className="flex-1 overflow-y-auto">
           <Routes>
-            <Route path="/" element={<Overview />} />
-            <Route path="/beneficiaries" element={<BeneficiaryInfo />} />
-            <Route path="/activities" element={<ActivitiesTable />} />
-            <Route path="/reports" element={<Reports projects={projects} />} />
+            <Route path="/" element={<Overview beneficiaries={beneficiaries} activities={activities} projects={projects} />} />
+            <Route path="/beneficiaries" element={<BeneficiaryInfo beneficiaries={beneficiaries} setBeneficiaries={setBeneficiaries} />} />
+            <Route path="/activities" element={<ActivitiesTable activities={activities} setActivities={setActivities} />} />
+            <Route path="/reports" element={<Reports projects={projects} activities={activities} />} />
             <Route path="/project-management" element={<ProjectManagement projects={projects} setProjects={setProjects} />} />
             <Route path="/data-integration" element={<DataIntegrationStatus />} />
           </Routes>
