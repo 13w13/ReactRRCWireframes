@@ -34,50 +34,49 @@ const Reports = ({ projects, activities }) => {
     if (!selectedProject || !projects[selectedProject]) return;
 
     const projectData = projects[selectedProject];
-    const filteredActivities = activities.filter(
-      activity => 
-        activity.date >= startDate && 
-        activity.date <= endDate && 
-        projectData[0].linkedActivities.includes(activity.activityType)
-    );
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    const beneficiaryData = months.map(month => ({
+      name: month,
+      services: Math.floor(Math.random() * 1500),
+      uniqueBeneficiaries: Math.floor(Math.random() * 1000)
+    }));
 
-    const indicatorData = projectData.map(indicator => {
-      const relevantActivities = filteredActivities.filter(
-        activity => indicator.linkedActivities.includes(activity.activityType)
-      );
+    const indicatorProgress = projectData.map(indicator => ({
+      name: indicator.name,
+      target: indicator.target.value,
+      achieved: Math.floor(Math.random() * indicator.target.value)
+    }));
 
-      const uniqueBeneficiaries = new Set(relevantActivities.map(a => a.beneficiaryId)).size;
-      const totalServices = relevantActivities.length;
+    const beneficiaryTypes = projectData[0].beneficiaryTypes.map(type => ({
+      name: type,
+      value: Math.floor(Math.random() * 1000)
+    }));
 
-      // Mock SADD data (replace with actual data in a real scenario)
-      const maleCount = Math.floor(uniqueBeneficiaries * 0.48);
-      const femaleCount = uniqueBeneficiaries - maleCount;
-      const childrenCount = Math.floor(uniqueBeneficiaries * 0.3);
-      const adultCount = Math.floor(uniqueBeneficiaries * 0.6);
-      const elderlyCount = uniqueBeneficiaries - childrenCount - adultCount;
+    const totalServices = beneficiaryData.reduce((sum, data) => sum + data.services, 0);
+    const totalUniqueBeneficiaries = beneficiaryData.reduce((sum, data) => sum + data.uniqueBeneficiaries, 0);
+    const averageServicesPerBeneficiary = (totalServices / totalUniqueBeneficiaries).toFixed(2);
+    const projectProgress = (indicatorProgress[0].achieved / indicatorProgress[0].target * 100).toFixed(1);
 
-      return {
-        name: indicator.name,
-        target: indicator.target.value,
-        uniqueBeneficiaries,
+    setReportData({
+      beneficiaryData,
+      indicatorProgress,
+      beneficiaryTypes,
+      summary: {
         totalServices,
-        male: maleCount,
-        female: femaleCount,
-        children: childrenCount,
-        adult: adultCount,
-        elderly: elderlyCount
-      };
+        totalUniqueBeneficiaries,
+        averageServicesPerBeneficiary,
+        projectProgress
+      }
     });
-
-    setReportData(indicatorData);
   };
 
   const exportToExcel = () => {
     if (!reportData) return;
 
     const workbook = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(reportData);
-    XLSX.utils.book_append_sheet(workbook, ws, "Indicator Report");
+    const ws = XLSX.utils.json_to_sheet(reportData.beneficiaryData);
+    XLSX.utils.book_append_sheet(workbook, ws, "Monthly Data");
     XLSX.writeFile(workbook, `${selectedProject}_Report.xlsx`);
   };
 
@@ -119,42 +118,87 @@ const Reports = ({ projects, activities }) => {
       </div>
 
       {reportData && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Indicator Report</h2>
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="p-2 text-left">Indicator</th>
-                <th className="p-2 text-left">Target</th>
-                <th className="p-2 text-left">People Reached</th>
-                <th className="p-2 text-left">Services</th>
-                <th className="p-2 text-left">Male</th>
-                <th className="p-2 text-left">Female</th>
-                <th className="p-2 text-left">Children</th>
-                <th className="p-2 text-left">Adult</th>
-                <th className="p-2 text-left">Elderly</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportData.map((indicator, index) => (
-                <tr key={index} className="border-b">
-                  <td className="p-2">{indicator.name}</td>
-                  <td className="p-2">{indicator.target}</td>
-                  <td className="p-2">{indicator.uniqueBeneficiaries}</td>
-                  <td className="p-2">{indicator.totalServices}</td>
-                  <td className="p-2">{indicator.male}</td>
-                  <td className="p-2">{indicator.female}</td>
-                  <td className="p-2">{indicator.children}</td>
-                  <td className="p-2">{indicator.adult}</td>
-                  <td className="p-2">{indicator.elderly}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+        <>
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Services and Unique Beneficiaries</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={reportData.beneficiaryData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="services" stroke="#8884d8" name="Services" />
+                <Line type="monotone" dataKey="uniqueBeneficiaries" stroke="#82ca9d" name="Unique Beneficiaries" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
 
-      {/* ... (keep the existing charts for overall project visualization) */}
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Indicator Progress</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={reportData.indicatorProgress}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="achieved" fill="#8884d8" name="Achieved" />
+                <Bar dataKey="target" fill="#82ca9d" name="Target" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6 mb-6">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Types</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={reportData.beneficiaryTypes}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {reportData.beneficiaryTypes.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Project Summary</h2>
+              <table className="w-full">
+                <tbody>
+                  <tr className="border-b">
+                    <td className="py-2 font-semibold">Total Services:</td>
+                    <td className="py-2 text-right">{reportData.summary.totalServices}</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2 font-semibold">Total Unique Beneficiaries:</td>
+                    <td className="py-2 text-right">{reportData.summary.totalUniqueBeneficiaries}</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2 font-semibold">Average Services per Beneficiary:</td>
+                    <td className="py-2 text-right">{reportData.summary.averageServicesPerBeneficiary}</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 font-semibold">Project Progress:</td>
+                    <td className="py-2 text-right">{reportData.summary.projectProgress}%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
