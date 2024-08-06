@@ -16,6 +16,10 @@ const beneficiaryTypes = [
   'Children', 'Women', 'Elderly', 'Persons with Disabilities'
 ];
 
+const nationalities = [
+  'Romanian', 'Ukrainian', 'Moldovan', 'Syrian', 'Afghan', 'Other'
+];
+
 const ProjectManagement = ({ projects, setProjects }) => {
   const [selectedProject, setSelectedProject] = useState('');
   const [editMode, setEditMode] = useState(false);
@@ -26,6 +30,7 @@ const ProjectManagement = ({ projects, setProjects }) => {
     linkedActivities: [],
     locations: [],
     beneficiaryTypes: [],
+    nationalities: [],
     calculationMethod: ''
   });
 
@@ -79,6 +84,7 @@ const ProjectManagement = ({ projects, setProjects }) => {
         linkedActivities: [],
         locations: [],
         beneficiaryTypes: [],
+        nationalities: [],
         calculationMethod: ''
       });
     } else {
@@ -211,6 +217,23 @@ const ProjectManagement = ({ projects, setProjects }) => {
               ))}
             </div>
           </div>
+          <div className="mb-2">
+            <h4 className="font-semibold">Nationalities</h4>
+            <div className="grid grid-cols-2 gap-2">
+              {nationalities.map(nationality => (
+                <label key={nationality} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    value={nationality}
+                    checked={newIndicator.nationalities.includes(nationality)}
+                    onChange={(e) => handleCheckboxChange(e, 'nationalities')}
+                    className="mr-2"
+                  />
+                  {nationality}
+                </label>
+              ))}
+            </div>
+          </div>
           <textarea
             placeholder="Calculation Method"
             name="calculationMethod"
@@ -252,6 +275,7 @@ const ProjectManagement = ({ projects, setProjects }) => {
                 <p><strong>Linked Activities:</strong> {indicator.linkedActivities.join(', ')}</p>
                 <p><strong>Locations:</strong> {indicator.locations.join(', ')}</p>
                 <p><strong>Beneficiary Types:</strong> {indicator.beneficiaryTypes.join(', ')}</p>
+                <p><strong>Nationalities:</strong> {indicator.nationalities.join(', ')}</p>
                 <p><strong>Calculation Method:</strong> {indicator.calculationMethod}</p>
               </div>
             ))}

@@ -106,43 +106,44 @@ const ActivitiesTable = () => {
           <input
             type="text"
             name="source"
-            placeholder="Source"
+            placeholder="Source System"
             value={newActivity.source}
             onChange={handleInputChange}
             className="p-2 border rounded"
-          /></div>
-          <button onClick={handleAddActivity} className="bg-blue-500 text-white px-4 py-2 rounded">Add Activity</button>
+          />
         </div>
-  
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Activities List</h2>
-          <table className="w-full">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="p-2 text-left">Beneficiary ID</th>
-                <th className="p-2 text-left">Name</th>
-                <th className="p-2 text-left">Activity Type</th>
-                <th className="p-2 text-left">Date</th>
-                <th className="p-2 text-left">Location</th>
-                <th className="p-2 text-left">Source</th>
-              </tr>
-            </thead>
-            <tbody>
-              {activities.map(activity => (
-                <tr key={activity.id} className="border-b">
-                  <td className="p-2">{activity.beneficiaryId}</td>
-                  <td className="p-2">{activity.name}</td>
-                  <td className="p-2">{activity.activityType}</td>
-                  <td className="p-2">{activity.date}</td>
-                  <td className="p-2">{activity.location}</td>
-                  <td className="p-2">{activity.source}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <button onClick={handleAddActivity} className="bg-blue-500 text-white px-4 py-2 rounded">Add Activity</button>
       </div>
-    );
-  };
-  
-  export default ActivitiesTable;
+
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Activities List</h2>
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="p-2 text-left">Beneficiary ID</th>
+              <th className="p-2 text-left">Name</th>
+              <th className="p-2 text-left">Activity Type</th>
+              <th className="p-2 text-left">Date</th>
+              <th className="p-2 text-left">Location</th>
+              <th className="p-2 text-left">Source System</th>
+            </tr>
+          </thead>
+          <tbody>
+            {activities.map(activity => (
+              <tr key={activity.id} className="border-b">
+                <td className="p-2">{activity.beneficiaryId}</td>
+                <td className="p-2">{activity.name}</td>
+                <td className="p-2">{activity.activityType}</td>
+                <td className="p-2">{activity.date}</td>
+                <td className="p-2">{activity.location}</td>
+                <td className="p-2">{activity.source}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
+
+export default ActivitiesTable;

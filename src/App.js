@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import Dashboard from './components/Dashboard';
+import Overview from './components/Overview'; 
 import BeneficiaryInfo from './components/BeneficiaryInfo';
 import ActivitiesTable from './components/ActivitiesTable';
 import ProjectManagement from './components/ProjectManagement';
@@ -42,7 +42,7 @@ const App = () => {
             <h2 className="text-sm">Unified Beneficiary System</h2>
           </div>
           <nav className="mt-6">
-            <Link to="/" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Dashboard</Link>
+            <Link to="/" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Overview</Link>
             <Link to="/beneficiaries" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Beneficiaries</Link>
             <Link to="/activities" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Activities</Link>
             <Link to="/reports" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Reports</Link>
@@ -52,7 +52,7 @@ const App = () => {
         </div>
         <div className="flex-1 overflow-y-auto">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Overview />} />
             <Route path="/beneficiaries" element={<BeneficiaryInfo />} />
             <Route path="/activities" element={<ActivitiesTable />} />
             <Route path="/reports" element={<Reports projects={projects} />} />

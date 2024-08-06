@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ResponsiveContainer, 
   LineChart, 
@@ -14,6 +14,7 @@ import {
   Pie, 
   Cell 
 } from 'recharts';
+import * as XLSX from 'xlsx';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -23,8 +24,14 @@ const Reports = ({ projects }) => {
   const [endDate, setEndDate] = useState('2024-12-31');
   const [reportData, setReportData] = useState(null);
 
+  useEffect(() => {
+    if (selectedProject) {
+      generateReportData();
+    }
+  }, [selectedProject, startDate, endDate]);
+
   const generateReportData = () => {
-    if (!selectedProject || !projects[selectedProject]) return null;
+    if (!selectedProject || !projects[selectedProject]) return;
 
     const projectData = projects[selectedProject];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -50,12 +57,45 @@ const Reports = ({ projects }) => {
       value: Math.floor(Math.random() * 1000)
     }));
 
-    return { beneficiaryData, indicatorProgress, beneficiaryTypes };
+    setReportData({ beneficiaryData, indicatorProgress, beneficiaryTypes });
   };
 
-  const handleGenerateReport = () => {
-    const data = generateReportData();
-    setReportData(data);
+  const exportToExcel = () => {
+    if (!reportData) return;
+
+    const workbook = XLSX.utils.book_new();
+
+    // Create a sheet for each indicator
+    projects[selectedProject].forEach(indicator => {
+      const sheetData = [
+        ['Indicator', indicator.name],
+        ['Target', `${indicator.target.value} ${indicator.target.description}`],
+        ['Achieved', reportData.indicatorProgress.find(i => i.name === indicator.name)?.achieved || 0],
+        [''],
+        ['Date', 'Services', 'Unique Beneficiaries', 'Male', 'Female', 'Children', 'Adults', 'Elderly', ...indicator.nationalities],
+      ];
+
+      // Add mock data for each month
+      reportData.beneficiaryData.forEach(data => {
+        const row = [
+          data.name,
+          data.services,
+          data.uniqueBeneficiaries,
+          Math.floor(data.uniqueBeneficiaries * 0.48), // Mock male count
+          Math.floor(data.uniqueBeneficiaries * 0.52), // Mock female count
+          Math.floor(data.uniqueBeneficiaries * 0.3),  // Mock children count
+          Math.floor(data.uniqueBeneficiaries * 0.6),  // Mock adults count
+          Math.floor(data.uniqueBeneficiaries * 0.1),  // Mock elderly count
+          ...indicator.nationalities.map(() => Math.floor(Math.random() * data.uniqueBeneficiaries)), // Mock nationality counts
+        ];
+        sheetData.push(row);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(sheetData);
+      XLSX.utils.book_append_sheet(workbook, ws, indicator.name);
+    });
+
+    XLSX.writeFile(workbook, `${selectedProject}_Report.xlsx`);
   };
 
   return (
@@ -87,10 +127,11 @@ const Reports = ({ projects }) => {
           />
         </div>
         <button
-          onClick={handleGenerateReport}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          onClick={exportToExcel}
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          disabled={!reportData}
         >
-          Generate Report
+          Export to Excel
         </button>
       </div>
 
