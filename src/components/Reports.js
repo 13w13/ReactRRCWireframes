@@ -21,6 +21,7 @@ const Reports = ({ projects }) => {
   const [selectedProject, setSelectedProject] = useState('');
   const [startDate, setStartDate] = useState('2024-01-01');
   const [endDate, setEndDate] = useState('2024-12-31');
+  const [reportData, setReportData] = useState(null);
 
   const generateReportData = () => {
     if (!selectedProject || !projects[selectedProject]) return null;
@@ -28,11 +29,15 @@ const Reports = ({ projects }) => {
     const projectData = projects[selectedProject];
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
-    const beneficiaryData = months.map(month => ({
-      name: month,
-      beneficiaries: Math.floor(Math.random() * 1000),
-      services: Math.floor(Math.random() * 1500)
-    }));
+    const beneficiaryData = months.map(month => {
+      const services = Math.floor(Math.random() * 1500);
+      const uniqueBeneficiaries = Math.floor(services * (0.6 + Math.random() * 0.3)); // 60-90% of services
+      return {
+        name: month,
+        services,
+        uniqueBeneficiaries
+      };
+    });
 
     const indicatorProgress = projectData.map(indicator => ({
       name: indicator.name,
@@ -48,7 +53,10 @@ const Reports = ({ projects }) => {
     return { beneficiaryData, indicatorProgress, beneficiaryTypes };
   };
 
-  const reportData = generateReportData();
+  const handleGenerateReport = () => {
+    const data = generateReportData();
+    setReportData(data);
+  };
 
   return (
     <div className="p-4 bg-gray-100">
@@ -78,22 +86,27 @@ const Reports = ({ projects }) => {
             className="p-2 border rounded" 
           />
         </div>
+        <button
+          onClick={handleGenerateReport}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Generate Report
+        </button>
       </div>
 
       {reportData && (
         <>
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Reach and Services</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Services and Unique Beneficiaries</h2>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={reportData.beneficiaryData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
-                <YAxis yAxisId="left" />
-                <YAxis yAxisId="right" orientation="right" />
+                <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line yAxisId="left" type="monotone" dataKey="beneficiaries" stroke="#8884d8" name="Beneficiaries" />
-                <Line yAxisId="right" type="monotone" dataKey="services" stroke="#82ca9d" name="Services" />
+                <Line type="monotone" dataKey="services" stroke="#8884d8" name="Services" />
+                <Line type="monotone" dataKey="uniqueBeneficiaries" stroke="#82ca9d" name="Unique Beneficiaries" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -113,7 +126,7 @@ const Reports = ({ projects }) => {
             </ResponsiveContainer>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6 mb-6">
             <div className="bg-white rounded-lg shadow-md p-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Types</h2>
               <ResponsiveContainer width="100%" height={300}>
@@ -142,18 +155,18 @@ const Reports = ({ projects }) => {
               <table className="w-full">
                 <tbody>
                   <tr className="border-b">
-                    <td className="py-2 font-semibold">Total Beneficiaries:</td>
-                    <td className="py-2 text-right">{reportData.beneficiaryData.reduce((sum, data) => sum + data.beneficiaries, 0)}</td>
-                  </tr>
-                  <tr className="border-b">
                     <td className="py-2 font-semibold">Total Services:</td>
                     <td className="py-2 text-right">{reportData.beneficiaryData.reduce((sum, data) => sum + data.services, 0)}</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2 font-semibold">Total Unique Beneficiaries:</td>
+                    <td className="py-2 text-right">{reportData.beneficiaryData.reduce((sum, data) => sum + data.uniqueBeneficiaries, 0)}</td>
                   </tr>
                   <tr className="border-b">
                     <td className="py-2 font-semibold">Average Services per Beneficiary:</td>
                     <td className="py-2 text-right">
                       {(reportData.beneficiaryData.reduce((sum, data) => sum + data.services, 0) / 
-                        reportData.beneficiaryData.reduce((sum, data) => sum + data.beneficiaries, 0)).toFixed(2)}
+                        reportData.beneficiaryData.reduce((sum, data) => sum + data.uniqueBeneficiaries, 0)).toFixed(2)}
                     </td>
                   </tr>
                   <tr>
@@ -166,6 +179,28 @@ const Reports = ({ projects }) => {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Monthly Breakdown</h2>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-2 text-left">Month</th>
+                  <th className="p-2 text-left">Services</th>
+                  <th className="p-2 text-left">Unique Beneficiaries</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reportData.beneficiaryData.map((data, index) => (
+                  <tr key={index} className="border-b">
+                    <td className="p-2">{data.name}</td>
+                    <td className="p-2">{data.services}</td>
+                    <td className="p-2">{data.uniqueBeneficiaries}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </>
       )}

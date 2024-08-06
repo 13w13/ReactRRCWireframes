@@ -1,5 +1,21 @@
 import React, { useState } from 'react';
 
+const activityTypes = [
+  'Health consultations', 'Food Distribution', 'Shelter Support', 'WASH Activities',
+  'Protection Services', 'Education Support', 'Livelihoods Assistance',
+  'Cash Assistance', 'Psychosocial Support'
+];
+
+const locations = [
+  'Bucharest Branch', 'Cluj-Napoca Branch', 'Iasi Branch', 'Timisoara Branch',
+  'Constanta Branch', 'Mobile Clinic', 'Refugee Camp A', 'Refugee Camp B'
+];
+
+const beneficiaryTypes = [
+  'Refugees', 'Internally Displaced Persons', 'Host Community Members',
+  'Children', 'Women', 'Elderly', 'Persons with Disabilities'
+];
+
 const ProjectManagement = ({ projects, setProjects }) => {
   const [selectedProject, setSelectedProject] = useState('');
   const [editMode, setEditMode] = useState(false);
@@ -85,15 +101,14 @@ const ProjectManagement = ({ projects, setProjects }) => {
     }
   };
 
-  const handleMultiSelect = (e, field) => {
-    const options = e.target.options;
-    const selectedValues = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selectedValues.push(options[i].value);
-      }
-    }
-    setNewIndicator(prev => ({ ...prev, [field]: selectedValues }));
+  const handleCheckboxChange = (e, field) => {
+    const { value, checked } = e.target;
+    setNewIndicator(prev => ({
+      ...prev,
+      [field]: checked
+        ? [...prev[field], value]
+        : prev[field].filter(item => item !== value)
+    }));
   };
 
   return (
@@ -145,45 +160,71 @@ const ProjectManagement = ({ projects, setProjects }) => {
               className="p-2 border rounded"
             />
           </div>
-          <select
-            multiple
-            name="linkedActivities"
-            value={newIndicator.linkedActivities}
-            onChange={(e) => handleMultiSelect(e, 'linkedActivities')}
-            className="p-2 border rounded mb-2 w-full"
-          >
-            <option value="Food Distribution">Food Distribution</option>
-            <option value="Health Check">Health Check</option>
-            <option value="Language Class">Language Class</option>
-            <option value="Job Training">Job Training</option>
-          </select>
-          <select
-            multiple
-            name="beneficiaryTypes"
-            value={newIndicator.beneficiaryTypes}
-            onChange={(e) => handleMultiSelect(e, 'beneficiaryTypes')}
-            className="p-2 border rounded mb-2 w-full"
-          >
-            <option value="Refugees">Refugees</option>
-            <option value="Children">Children</option>
-            <option value="Women">Women</option>
-            <option value="Elderly">Elderly</option>
-          </select>
-          <input
-            type="text"
+          <div className="mb-2">
+            <h4 className="font-semibold">Linked Activities</h4>
+            <div className="grid grid-cols-2 gap-2">
+              {activityTypes.map(activity => (
+                <label key={activity} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    value={activity}
+                    checked={newIndicator.linkedActivities.includes(activity)}
+                    onChange={(e) => handleCheckboxChange(e, 'linkedActivities')}
+                    className="mr-2"
+                  />
+                  {activity}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="mb-2">
+            <h4 className="font-semibold">Locations</h4>
+            <div className="grid grid-cols-2 gap-2">
+              {locations.map(location => (
+                <label key={location} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    value={location}
+                    checked={newIndicator.locations.includes(location)}
+                    onChange={(e) => handleCheckboxChange(e, 'locations')}
+                    className="mr-2"
+                  />
+                  {location}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div className="mb-2">
+            <h4 className="font-semibold">Beneficiary Types</h4>
+            <div className="grid grid-cols-2 gap-2">
+              {beneficiaryTypes.map(type => (
+                <label key={type} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    value={type}
+                    checked={newIndicator.beneficiaryTypes.includes(type)}
+                    onChange={(e) => handleCheckboxChange(e, 'beneficiaryTypes')}
+                    className="mr-2"
+                  />
+                  {type}
+                </label>
+              ))}
+            </div>
+          </div>
+          <textarea
             placeholder="Calculation Method"
             name="calculationMethod"
             value={newIndicator.calculationMethod}
             onChange={handleIndicatorInputChange}
-            className="p-2 border rounded mb-2 w-full"
+            className="p-2 border rounded w-full mb-2"
           />
-          <button onClick={handleAddIndicator} className="bg-green-500 text-white px-4 py-2 rounded">
+          <button onClick={handleAddIndicator} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
             Add Indicator
           </button>
         </div>
         <button
           onClick={editMode ? handleUpdateProject : handleAddProject}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           {editMode ? 'Update Project' : 'Add Project'}
         </button>
@@ -214,7 +255,7 @@ const ProjectManagement = ({ projects, setProjects }) => {
                 <p><strong>Calculation Method:</strong> {indicator.calculationMethod}</p>
               </div>
             ))}
-            <button onClick={handleEditProject} className="bg-yellow-500 text-white px-4 py-2 rounded">
+            <button onClick={handleEditProject} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">
               Edit Project
             </button>
           </div>

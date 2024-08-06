@@ -1,11 +1,35 @@
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
 
+const predefinedLists = {
+  activityTypes: ['Food Distribution', 'Health Check', 'Language Class', 'Job Training'],
+  locations: ['Bucharest Branch', 'Cluj-Napoca Branch', 'Iasi Branch', 'Mobile Clinic'],
+  beneficiaryTypes: ['Refugees', 'Children', 'Women', 'Elderly', 'Internally Displaced'],
+};
+
 const DataUpload = ({ onDataUploaded, templateFields, dataType }) => {
   const [file, setFile] = useState(null);
+  const [validationErrors, setValidationErrors] = useState([]);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
+    setValidationErrors([]);
+  };
+
+  const validateData = (data) => {
+    const errors = [];
+    data.forEach((row, index) => {
+      Object.keys(row).forEach(field => {
+        if (templateFields.includes(field)) {
+          if (!row[field]) {
+            errors.push(`Row ${index + 2}: ${field} is required`);
+          } else if (predefinedLists[field] && !predefinedLists[field].includes(row[field])) {
+            errors.push(`Row ${index + 2}: Invalid ${field} value`);
+          }
+        }
+      });
+    });
+    return errors;
   };
 
   const handleUpload = async () => {
@@ -22,7 +46,13 @@ const DataUpload = ({ onDataUploaded, templateFields, dataType }) => {
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      onDataUploaded(jsonData);
+      const errors = validateData(jsonData);
+      if (errors.length > 0) {
+        setValidationErrors(errors);
+      } else {
+        onDataUploaded(jsonData);
+        setValidationErrors([]);
+      }
     };
     reader.readAsArrayBuffer(file);
   };
@@ -31,6 +61,13 @@ const DataUpload = ({ onDataUploaded, templateFields, dataType }) => {
     const ws = XLSX.utils.json_to_sheet([templateFields.reduce((obj, field) => ({ ...obj, [field]: '' }), {})]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Template");
+
+    // Add predefined lists to a new sheet
+    const listsWs = XLSX.utils.json_to_sheet(
+      Object.entries(predefinedLists).map(([key, values]) => ({ [key]: values.join(', ') }))
+    );
+    XLSX.utils.book_append_sheet(wb, listsWs, "PredefinedLists");
+
     XLSX.writeFile(wb, `${dataType}_template.xlsx`);
   };
 
@@ -50,7 +87,7 @@ const DataUpload = ({ onDataUploaded, templateFields, dataType }) => {
             hover:file:bg-blue-100"
         />
       </div>
-      <div className="flex space-x-4">
+      <div className="flex space-x-4 mb-4">
         <button
           onClick={handleUpload}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -64,6 +101,16 @@ const DataUpload = ({ onDataUploaded, templateFields, dataType }) => {
           Download Template
         </button>
       </div>
+      {validationErrors.length > 0 && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong className="font-bold">Validation Errors:</strong>
+          <ul className="mt-2 list-disc list-inside">
+            {validationErrors.map((error, index) => (
+              <li key={index}>{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
