@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { ResponsiveContainer, Tooltip } from 'recharts';
-import { TreeMap } from 'recharts/lib/chart/TreeMap';
 
 const ProjectManagement = ({ projects, setProjects }) => {
   const [selectedProject, setSelectedProject] = useState('');
@@ -44,47 +42,35 @@ const ProjectManagement = ({ projects, setProjects }) => {
   const renderProjectStructure = () => {
     if (!selectedProject) return null;
 
-    const projectData = {
-      name: selectedProject,
-      children: projects[selectedProject].map(indicator => ({
-        name: indicator.name,
-        size: indicator.target.value,
-        children: [
-          ...indicator.linkedActivities.map(activity => ({ name: activity, size: 1 })),
-          ...indicator.beneficiaryTypes.map(type => ({ name: type, size: 1 }))
-        ]
-      }))
-    };
-
     return (
       <div className="mt-6 bg-white rounded-lg shadow-md p-6">
         <h3 className="text-xl font-semibold mb-4">Project Structure</h3>
-        <ResponsiveContainer width="100%" height={400}>
-          <TreeMap
-            data={[projectData]}
-            dataKey="size"
-            aspectRatio={4 / 3}
-            stroke="#fff"
-            fill="#8884d8"
-          >
-            <Tooltip content={<CustomTooltip />} />
-          </TreeMap>
-        </ResponsiveContainer>
+        <div className="space-y-4">
+          {projects[selectedProject].map((indicator, index) => (
+            <div key={index} className="border rounded p-4">
+              <h4 className="font-semibold">{indicator.name}</h4>
+              <p>Target: {indicator.target.value} {indicator.target.description}</p>
+              <div className="mt-2">
+                <h5 className="font-medium">Linked Activities:</h5>
+                <ul className="list-disc pl-5">
+                  {indicator.linkedActivities.map((activity, idx) => (
+                    <li key={idx}>{activity}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="mt-2">
+                <h5 className="font-medium">Beneficiary Types:</h5>
+                <ul className="list-disc pl-5">
+                  {indicator.beneficiaryTypes.map((type, idx) => (
+                    <li key={idx}>{type}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
-  };
-
-  const CustomTooltip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div className="bg-white border p-2 shadow-md">
-          <p className="font-semibold">{data.name}</p>
-          {data.target && <p>Target: {data.target.value} {data.target.description}</p>}
-        </div>
-      );
-    }
-    return null;
   };
 
   return (
@@ -125,8 +111,8 @@ const ProjectManagement = ({ projects, setProjects }) => {
         {selectedProject && (
           <div>
             <h3 className="text-xl font-semibold mb-2">Project Indicators</h3>
-            {projects[selectedProject].map((indicator) => (
-              <div key={indicator.id} className="mb-4 p-4 border rounded">
+            {projects[selectedProject].map((indicator, index) => (
+              <div key={index} className="mb-4 p-4 border rounded">
                 <p><strong>Name:</strong> {indicator.name}</p>
                 <p><strong>Target:</strong> {indicator.target.value} {indicator.target.description}</p>
                 <p><strong>Linked Activities:</strong> {indicator.linkedActivities.join(', ')}</p>
