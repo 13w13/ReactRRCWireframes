@@ -18,11 +18,17 @@ const Reports = ({ projects }) => {
   }, [selectedProject, startDate, endDate]);
 
   const generateReport = () => {
+    // Check if the selected project exists
+    if (!projects[selectedProject]) {
+      console.error('Selected project not found');
+      return;
+    }
+
     // In a real application, this would fetch data from an API
     const newReportData = projects[selectedProject].map(indicator => ({
       name: indicator.name,
       target: indicator.target.value,
-      progress: Math.floor(Math.random() * indicator.target.value),
+      progress: Math.min(Math.floor(Math.random() * indicator.target.value), indicator.target.value),
     }));
     setReportData(newReportData);
 
