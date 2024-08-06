@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import BeneficiaryInfo from './components/BeneficiaryInfo';
@@ -8,6 +8,31 @@ import Reports from './components/Reports';
 import DataIntegrationStatus from './components/DataIntegrationStatus';
 
 const App = () => {
+  const [projects, setProjects] = useState({
+    SEM: [
+      {
+        id: 'sem1',
+        name: 'Employability support',
+        target: { value: 1000, description: 'People supported' },
+        linkedActivities: ['Livelihoods Assistance', 'Education Support'],
+        locations: ['Bucharest Branch', 'Cluj-Napoca Branch'],
+        beneficiaryTypes: ['Refugees', 'Internally Displaced Persons'],
+        calculationMethod: 'Count of unique beneficiaries receiving employability support'
+      },
+    ],
+    Ukraine: [
+      {
+        id: 'ukr1',
+        name: 'Primary health services',
+        target: { value: 5000, description: 'Consultations provided' },
+        linkedActivities: ['Health consultations'],
+        locations: ['Mobile Clinic', 'Refugee Camp A', 'Refugee Camp B'],
+        beneficiaryTypes: ['Refugees', 'Children', 'Women', 'Elderly'],
+        calculationMethod: 'Sum of all health consultations provided'
+      },
+    ],
+  });
+
   return (
     <Router>
       <div className="flex h-screen">
@@ -30,8 +55,8 @@ const App = () => {
             <Route path="/" element={<Dashboard />} />
             <Route path="/beneficiaries" element={<BeneficiaryInfo />} />
             <Route path="/activities" element={<ActivitiesTable />} />
-            <Route path="/project-management" element={<ProjectManagement />} />
-            <Route path="/reports" element={<Reports />} />
+            <Route path="/project-management" element={<ProjectManagement projects={projects} setProjects={setProjects} />} />
+            <Route path="/reports" element={<Reports projects={projects} />} />
             <Route path="/data-integration" element={<DataIntegrationStatus />} />
           </Routes>
         </div>
