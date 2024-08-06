@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import DataUpload from './DataUpload';
 
-const mockBeneficiaries = [
+const initialBeneficiaries = [
   {
     id: 'B12345',
     name: 'John Doe',
@@ -13,29 +14,50 @@ const mockBeneficiaries = [
     ],
     lastActivity: { type: 'Food Distribution', date: '2024-08-06', location: 'Bucharest' },
   },
-  {
-    id: 'B67890',
-    name: 'Maria Smith',
-    dateOfBirth: '1990-05-15',
-    gender: 'Female',
-    nationality: 'Romanian',
-    familyMembers: [
-      { id: 'B67891', name: 'John Smith', relation: 'Spouse' },
-    ],
-    lastActivity: { type: 'Health Check', date: '2024-08-05', location: 'Mobile Clinic' },
-  },
+  // ... other beneficiaries
+];
+
+const beneficiaryTemplateFields = [
+  'id', 'name', 'dateOfBirth', 'gender', 'nationality', 
+  'familyMember1Name', 'familyMember1Relation',
+  'familyMember2Name', 'familyMember2Relation',
+  'lastActivityType', 'lastActivityDate', 'lastActivityLocation'
 ];
 
 const BeneficiaryInfo = () => {
+  const [beneficiaries, setBeneficiaries] = useState(initialBeneficiaries);
   const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
 
   const handleRowClick = (beneficiary) => {
     setSelectedBeneficiary(beneficiary);
   };
 
+  const handleDataUploaded = (uploadedData) => {
+    const newBeneficiaries = uploadedData.map(beneficiary => ({
+      ...beneficiary,
+      familyMembers: [
+        { id: `${beneficiary.id}-1`, name: beneficiary.familyMember1Name, relation: beneficiary.familyMember1Relation },
+        { id: `${beneficiary.id}-2`, name: beneficiary.familyMember2Name, relation: beneficiary.familyMember2Relation },
+      ].filter(member => member.name && member.relation),
+      lastActivity: {
+        type: beneficiary.lastActivityType,
+        date: beneficiary.lastActivityDate,
+        location: beneficiary.lastActivityLocation
+      }
+    }));
+    setBeneficiaries(prev => [...prev, ...newBeneficiaries]);
+  };
+
   return (
     <div className="p-4 bg-gray-100">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Beneficiary Information (MOCKUP)</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Beneficiary Information</h1>
+
+      <DataUpload 
+        onDataUploaded={handleDataUploaded}
+        templateFields={beneficiaryTemplateFields}
+        dataType="Beneficiaries"
+      />
+
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiaries List</h2>
         <table className="min-w-full bg-white">
@@ -50,7 +72,7 @@ const BeneficiaryInfo = () => {
             </tr>
           </thead>
           <tbody>
-            {mockBeneficiaries.map((beneficiary) => (
+            {beneficiaries.map((beneficiary) => (
               <tr
                 key={beneficiary.id}
                 className="cursor-pointer hover:bg-gray-100"
@@ -71,13 +93,19 @@ const BeneficiaryInfo = () => {
       {selectedBeneficiary && (
         <div className="mt-6 bg-white rounded-lg shadow-md p-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Details</h2>
-          <p><strong>ID:</strong> {selectedBeneficiary.id}</p>
-          <p><strong>Name:</strong> {selectedBeneficiary.name}</p>
-          <p><strong>Date of Birth:</strong> {selectedBeneficiary.dateOfBirth}</p>
-          <p><strong>Gender:</strong> {selectedBeneficiary.gender}</p>
-          <p><strong>Nationality:</strong> {selectedBeneficiary.nationality}</p>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <p><strong>ID:</strong> {selectedBeneficiary.id}</p>
+              <p><strong>Name:</strong> {selectedBeneficiary.name}</p>
+              <p><strong>Date of Birth:</strong> {selectedBeneficiary.dateOfBirth}</p>
+            </div>
+            <div>
+              <p><strong>Gender:</strong> {selectedBeneficiary.gender}</p>
+              <p><strong>Nationality:</strong> {selectedBeneficiary.nationality}</p>
+            </div>
+          </div>
           <h3 className="text-xl font-semibold mt-4 mb-2">Family Members</h3>
-          <ul>
+          <ul className="list-disc pl-5 mb-4">
             {selectedBeneficiary.familyMembers.map(member => (
               <li key={member.id}>{member.name} - {member.relation}</li>
             ))}

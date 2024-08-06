@@ -9,7 +9,7 @@ const mockSyncStatus = [
 const DataIntegrationStatus = () => {
   return (
     <div className="p-4 bg-gray-100">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Data Integration Status (MOCKUP)</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Data Integration Status</h1>
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">System Sync Status</h2>
         <table className="w-full">

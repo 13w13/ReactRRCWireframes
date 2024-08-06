@@ -1,78 +1,77 @@
 import React from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
-const mockActivities = [
-  { id: 1, beneficiaryId: 'B12345', name: 'John Doe', activityType: 'Food Distribution', date: '2024-08-06', location: 'Bucharest Branch', source: 'Concept Store' },
-  { id: 2, beneficiaryId: 'B67890', name: 'Jane Smith', activityType: 'Health Check', date: '2024-08-06', location: 'Mobile Clinic', source: 'Easy Medical' },
-  { id: 3, beneficiaryId: 'B54321', name: 'Maria Pop', activityType: 'Language Class', date: '2024-08-05', location: 'Constanta Branch', source: 'EspoCRM' },
-];
+const Dashboard = () => {
+  const mockData = [
+    { month: 'Jan', beneficiaries: 1000, services: 1500 },
+    { month: 'Feb', beneficiaries: 2200, services: 3300 },
+    { month: 'Mar', beneficiaries: 3500, services: 5200 },
+    { month: 'Apr', beneficiaries: 5000, services: 7500 },
+    { month: 'May', beneficiaries: 6800, services: 10200 },
+    { month: 'Jun', beneficiaries: 9000, services: 13500 },
+  ];
 
-const mockProjectData = [
-  { name: 'SEM Project', activities: 120 },
-  { name: 'Ukraine Response', activities: 85 },
-  { name: 'Education Program', activities: 65 },
-];
-
-const Dashboard = () => (
-  <div className="p-4 bg-gray-100">
-    <h1 className="text-3xl font-bold text-gray-800 mb-6">Dashboard (MOCKUP)</h1>
-    
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Quick Stats</h2>
-      <div className="flex justify-between">
-        <div>
-          <p className="text-lg font-semibold text-gray-600">Total Beneficiaries</p>
-          <p className="text-3xl font-bold text-blue-600">1,234</p>
+  return (
+    <div className="p-4 bg-gray-100">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Unified Beneficiary System Dashboard</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <h2 className="text-xl font-semibold mb-2">Total Beneficiaries</h2>
+          <p className="text-3xl font-bold text-blue-600">9,000</p>
         </div>
-        <div>
-          <p className="text-lg font-semibold text-gray-600">Activities Today</p>
-          <p className="text-3xl font-bold text-green-600">56</p>
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <h2 className="text-xl font-semibold mb-2">Total Services Provided</h2>
+          <p className="text-3xl font-bold text-green-600">13,500</p>
         </div>
       </div>
-    </div>
+      
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Cumulative Reach and Services</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={mockData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line type="monotone" dataKey="beneficiaries" stroke="#8884d8" name="Beneficiaries" />
+            <Line type="monotone" dataKey="services" stroke="#82ca9d" name="Services" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
 
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Project Activities</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={mockProjectData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="activities" fill="#8884d8" />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-    
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Recent Activities</h2>
-      <table className="w-full">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="p-2 text-left">Beneficiary ID</th>
-            <th className="p-2 text-left">Name</th>
-            <th className="p-2 text-left">Activity Type</th>
-            <th className="p-2 text-left">Date</th>
-            <th className="p-2 text-left">Location</th>
-            <th className="p-2 text-left">Source</th>
-          </tr>
-        </thead>
-        <tbody>
-          {mockActivities.map(activity => (
-            <tr key={activity.id} className="border-b">
-              <td className="p-2">{activity.beneficiaryId}</td>
-              <td className="p-2">{activity.name}</td>
-              <td className="p-2">{activity.activityType}</td>
-              <td className="p-2">{activity.date}</td>
-              <td className="p-2">{activity.location}</td>
-              <td className="p-2">{activity.source}</td>
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Data Integration Status</h2>
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="p-2 text-left">Source System</th>
+              <th className="p-2 text-left">Last Sync</th>
+              <th className="p-2 text-left">Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <tr className="border-b">
+              <td className="p-2">EspoCRM</td>
+              <td className="p-2">2024-08-06 10:30 AM</td>
+              <td className="p-2"><span className="px-2 py-1 bg-green-500 text-white rounded">Synced</span></td>
+            </tr>
+            <tr className="border-b">
+              <td className="p-2">Easy Medical</td>
+              <td className="p-2">2024-08-06 09:45 AM</td>
+              <td className="p-2"><span className="px-2 py-1 bg-green-500 text-white rounded">Synced</span></td>
+            </tr>
+            <tr>
+              <td className="p-2">Humanity Concept Store</td>
+              <td className="p-2">2024-08-05 11:15 PM</td>
+              <td className="p-2"><span className="px-2 py-1 bg-yellow-500 text-white rounded">Pending</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default Dashboard;

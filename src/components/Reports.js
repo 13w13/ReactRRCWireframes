@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
+import React, { useState } from 'react';
+import { ResponsiveContainer, LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -7,48 +7,38 @@ const Reports = ({ projects }) => {
   const [selectedProject, setSelectedProject] = useState('');
   const [startDate, setStartDate] = useState('2024-01-01');
   const [endDate, setEndDate] = useState('2024-12-31');
-  const [reportData, setReportData] = useState([]);
-  const [genderData, setGenderData] = useState([]);
-  const [ageData, setAgeData] = useState([]);
 
-  useEffect(() => {
-    if (selectedProject) {
-      generateReport();
-    }
-  }, [selectedProject, startDate, endDate]);
+  const generateReportData = () => {
+    if (!selectedProject || !projects[selectedProject]) return null;
 
-  const generateReport = () => {
-    // Check if the selected project exists
-    if (!projects[selectedProject]) {
-      console.error('Selected project not found');
-      return;
-    }
+    const projectData = projects[selectedProject];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const beneficiaryData = months.map(month => ({
+      name: month,
+      beneficiaries: Math.floor(Math.random() * 1000),
+      services: Math.floor(Math.random() * 1500)
+    }));
 
-    // In a real application, this would fetch data from an API
-    const newReportData = projects[selectedProject].map(indicator => ({
+    const indicatorProgress = projectData.map(indicator => ({
       name: indicator.name,
       target: indicator.target.value,
-      progress: Math.min(Math.floor(Math.random() * indicator.target.value), indicator.target.value),
+      achieved: Math.floor(Math.random() * indicator.target.value)
     }));
-    setReportData(newReportData);
 
-    // Generate mock gender and age data
-    setGenderData([
-      { name: 'Male', value: Math.floor(Math.random() * 1000) },
-      { name: 'Female', value: Math.floor(Math.random() * 1000) },
-    ]);
-    setAgeData([
-      { name: '0-18', value: Math.floor(Math.random() * 500) },
-      { name: '19-30', value: Math.floor(Math.random() * 500) },
-      { name: '31-50', value: Math.floor(Math.random() * 500) },
-      { name: '51+', value: Math.floor(Math.random() * 500) },
-    ]);
+    const beneficiaryTypes = projectData[0].beneficiaryTypes.map(type => ({
+      name: type,
+      value: Math.floor(Math.random() * 1000)
+    }));
+
+    return { beneficiaryData, indicatorProgress, beneficiaryTypes };
   };
+
+  const reportData = generateReportData();
 
   return (
     <div className="p-4 bg-gray-100">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Reports (MOCKUP)</h1>
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Project Reports</h1>
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <div className="grid grid-cols-3 gap-4 mb-4">
           <select 
             value={selectedProject} 
@@ -73,93 +63,97 @@ const Reports = ({ projects }) => {
             className="p-2 border rounded" 
           />
         </div>
-        <button
-          onClick={generateReport}
-          className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-          disabled={!selectedProject}
-        >
-          Generate Report
-        </button>
-        
-        {reportData.length > 0 && (
-          <>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Project Indicators</h2>
-            <table className="w-full mb-6">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="p-2 text-left">Indicator</th>
-                  <th className="p-2 text-left">Target</th>
-                  <th className="p-2 text-left">Progress</th>
-                  <th className="p-2 text-left">Percentage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reportData.map((indicator) => (
-                  <tr key={indicator.name} className="border-b">
-                    <td className="p-2">{indicator.name}</td>
-                    <td className="p-2">{indicator.target}</td>
-                    <td className="p-2">{indicator.progress}</td>
-                    <td className="p-2">{Math.round((indicator.progress / indicator.target) * 100)}%</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div>
-                <h3 className="text-xl font-semibold mb-2">Indicator Progress</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={reportData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="progress" fill="#8884d8" name="Progress" />
-                    <Bar dataKey="target" fill="#82ca9d" name="Target" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2">Gender Distribution</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={genderData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {genderData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+      {reportData && (
+        <>
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Reach and Services</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={reportData.beneficiaryData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip />
+                <Legend />
+                <Line yAxisId="left" type="monotone" dataKey="beneficiaries" stroke="#8884d8" name="Beneficiaries" />
+                <Line yAxisId="right" type="monotone" dataKey="services" stroke="#82ca9d" name="Services" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
 
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Age Distribution</h3>
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Indicator Progress</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={reportData.indicatorProgress}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="achieved" fill="#8884d8" name="Achieved" />
+                <Bar dataKey="target" fill="#82ca9d" name="Target" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Types</h2>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={ageData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
+                <PieChart>
+                  <Pie
+                    data={reportData.beneficiaryTypes}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {reportData.beneficiaryTypes.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
                   <Tooltip />
-                  <Legend />
-                  <Bar dataKey="value" fill="#82ca9d" />
-                </BarChart>
+                </PieChart>
               </ResponsiveContainer>
             </div>
-          </>
-        )}
-      </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Project Summary</h2>
+              <table className="w-full">
+                <tbody>
+                  <tr className="border-b">
+                    <td className="py-2 font-semibold">Total Beneficiaries:</td>
+                    <td className="py-2 text-right">{reportData.beneficiaryData.reduce((sum, data) => sum + data.beneficiaries, 0)}</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2 font-semibold">Total Services:</td>
+                    <td className="py-2 text-right">{reportData.beneficiaryData.reduce((sum, data) => sum + data.services, 0)}</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2 font-semibold">Average Services per Beneficiary:</td>
+                    <td className="py-2 text-right">
+                      {(reportData.beneficiaryData.reduce((sum, data) => sum + data.services, 0) / 
+                        reportData.beneficiaryData.reduce((sum, data) => sum + data.beneficiaries, 0)).toFixed(2)}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 font-semibold">Project Progress:</td>
+                    <td className="py-2 text-right">
+                      {(reportData.indicatorProgress.reduce((sum, indicator) => sum + indicator.achieved, 0) / 
+                        reportData.indicatorProgress.reduce((sum, indicator) => sum + indicator.target, 0) * 100).toFixed(1)}%
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
