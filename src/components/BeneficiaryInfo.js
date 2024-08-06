@@ -1,5 +1,5 @@
 import React from 'react';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const mockBeneficiaries = [
   {
@@ -27,14 +27,13 @@ const mockBeneficiaries = [
     ],
     lastActivity: { type: 'Medical Aid', date: '2024-07-20', location: 'London' },
   },
-  // Add more beneficiaries as needed
 ];
 
 const BeneficiaryInfo = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const handleRowClick = (id) => {
-    history.push(`/beneficiary/${id}`);
+    navigate(`/beneficiary/${id}`);
   };
 
   return (

@@ -1,4 +1,5 @@
 import React from 'react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const mockActivities = [
   { id: 1, beneficiaryId: 'B12345', name: 'John Doe', activityType: 'Food Distribution', date: '2024-08-06', location: 'Bucharest Branch', source: 'Humanity concept store App' },
@@ -6,8 +7,16 @@ const mockActivities = [
   { id: 3, beneficiaryId: 'B54321', name: 'Maria Pop', activityType: 'Language Class', date: '2024-08-05', location: 'Constanta Branch', source: 'EspoCRM' },
 ];
 
+const mockProjects = [
+  { name: 'Emergency Response', activities: 120 },
+  { name: 'Health Support', activities: 85 },
+  { name: 'Education Program', activities: 65 },
+];
+
 const Dashboard = () => (
   <div className="p-4 bg-gray-100">
+    <h1 className="text-3xl font-bold text-gray-800 mb-6">Activity Overview Dashboard</h1>
+    
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Quick Stats</h2>
       <div className="flex justify-between">
@@ -21,6 +30,21 @@ const Dashboard = () => (
         </div>
       </div>
     </div>
+
+    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 className="text-2xl font-bold text-gray-800 mb-4">Project Activities</h2>
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={mockProjects}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="activities" fill="#8884d8" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+    
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Recent Activities</h2>
       <table className="w-full">
