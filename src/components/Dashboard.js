@@ -2,20 +2,20 @@ import React from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const mockActivities = [
-  { id: 1, beneficiaryId: 'B12345', name: 'John Doe', activityType: 'Food Distribution', date: '2024-08-06', location: 'Bucharest Branch', source: 'Humanity concept store App' },
-  { id: 2, beneficiaryId: 'B67890', name: 'Jane Smith', activityType: 'Health Check', date: '2024-08-06', location: 'Bucharest Mobile Clinic', source: 'Easy Medical' },
+  { id: 1, beneficiaryId: 'B12345', name: 'John Doe', activityType: 'Food Distribution', date: '2024-08-06', location: 'Bucharest Branch', source: 'Concept Store' },
+  { id: 2, beneficiaryId: 'B67890', name: 'Jane Smith', activityType: 'Health Check', date: '2024-08-06', location: 'Mobile Clinic', source: 'Easy Medical' },
   { id: 3, beneficiaryId: 'B54321', name: 'Maria Pop', activityType: 'Language Class', date: '2024-08-05', location: 'Constanta Branch', source: 'EspoCRM' },
 ];
 
-const mockProjects = [
-  { name: 'Emergency Response', activities: 120 },
-  { name: 'Health Support', activities: 85 },
+const mockProjectData = [
+  { name: 'SEM Project', activities: 120 },
+  { name: 'Ukraine Response', activities: 85 },
   { name: 'Education Program', activities: 65 },
 ];
 
 const Dashboard = () => (
   <div className="p-4 bg-gray-100">
-    <h1 className="text-3xl font-bold text-gray-800 mb-6">Activity Overview Dashboard</h1>
+    <h1 className="text-3xl font-bold text-gray-800 mb-6">Dashboard (MOCKUP)</h1>
     
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Quick Stats</h2>
@@ -34,7 +34,7 @@ const Dashboard = () => (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Project Activities</h2>
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={mockProjects}>
+        <BarChart data={mockProjectData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="name" />
           <YAxis />
