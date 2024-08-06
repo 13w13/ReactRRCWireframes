@@ -45,8 +45,8 @@ const App = () => {
             <Link to="/" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Dashboard</Link>
             <Link to="/beneficiaries" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Beneficiaries</Link>
             <Link to="/activities" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Activities</Link>
-            <Link to="/project-management" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Project Management</Link>
             <Link to="/reports" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Reports</Link>
+            <Link to="/project-management" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Project Management</Link>
             <Link to="/data-integration" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Data Integration</Link>
           </nav>
         </div>
@@ -55,8 +55,8 @@ const App = () => {
             <Route path="/" element={<Dashboard />} />
             <Route path="/beneficiaries" element={<BeneficiaryInfo />} />
             <Route path="/activities" element={<ActivitiesTable />} />
-            <Route path="/project-management" element={<ProjectManagement projects={projects} setProjects={setProjects} />} />
             <Route path="/reports" element={<Reports projects={projects} />} />
+            <Route path="/project-management" element={<ProjectManagement projects={projects} setProjects={setProjects} />} />
             <Route path="/data-integration" element={<DataIntegrationStatus />} />
           </Routes>
         </div>
