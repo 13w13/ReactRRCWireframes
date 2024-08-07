@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
+import dynamic from 'next/dynamic';
+
+const DynamicMap = dynamic(() => import('./Map'), {
+  ssr: false
+});
 
 const Reports = ({ projects, activities, beneficiaries, locations }) => {
   const [selectedProject, setSelectedProject] = useState('');
@@ -287,21 +291,11 @@ const Reports = ({ projects, activities, beneficiaries, locations }) => {
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Geographic Distribution of Beneficiaries</h2>
-            <div style={{ height: '400px', width: '100%' }}>
-              <MapContainer center={[45.9432, 24.9668]} zoom={7} style={{ height: '100%', width: '100%' }}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                {Object.entries(reportData.locationDistribution).map(([name, data]) => (
-                  <Marker key={name} position={[data.latitude, data.longitude]}>
-                    <Popup>
-                      <strong>{name}</strong><br />
-                      People reached: {data.count}
-                    </Popup>
-                  </Marker>
-                ))}
-              </MapContainer>
-            </div>
-          </div>
+  <h2 className="text-2xl font-bold text-gray-800 mb-4">Geographic Distribution of Beneficiaries</h2>
+  <div style={{ height: '400px', width: '100%' }}>
+    <DynamicMap locationDistribution={reportData.locationDistribution} />
+  </div>
+</div>
 
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Indicator Tracking Table</h2>
