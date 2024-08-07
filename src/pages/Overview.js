@@ -1,8 +1,6 @@
 import React from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import Map from '../components/Map';
+import SimpleMap from '../components/SimpleMap';
 
 const Overview = ({ beneficiaries, activities, projects, locations }) => {
   const totalBeneficiaries = beneficiaries.length;
@@ -138,11 +136,11 @@ const Overview = ({ beneficiaries, activities, projects, locations }) => {
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-  <h2 className="text-2xl font-bold text-gray-800 mb-4">Geographic Distribution of Beneficiaries</h2>
-  <div style={{ height: '400px', width: '100%' }}>
-    <Map locationDistribution={locationDistribution} />
-  </div>
-</div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Geographic Distribution of Beneficiaries</h2>
+        <div style={{ height: '400px', width: '100%' }}>
+          <SimpleMap locationDistribution={locationDistribution} />
+        </div>
+      </div>
     </div>
   );
 };

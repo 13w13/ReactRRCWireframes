@@ -9,8 +9,7 @@ import DataIntegrationStatus from './pages/DataIntegrationStatus';
 
 // Import mock data
 import { beneficiaries as mockBeneficiaries, activities as mockActivities, projects as mockProjects } from './data/mockData';
-import 'leaflet/dist/leaflet.css';
-
+// Removed: import 'leaflet/dist/leaflet.css';
 const App = () => {
   const [beneficiaries, setBeneficiaries] = useState(mockBeneficiaries);
   const [activities, setActivities] = useState(mockActivities);

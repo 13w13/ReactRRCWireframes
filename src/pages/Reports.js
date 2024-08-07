@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import Map from '../components/Map';
+import SimpleMap from '../components/SimpleMap';
 
 
 const Reports = ({ projects, activities, beneficiaries, locations }) => {
@@ -288,11 +287,11 @@ const Reports = ({ projects, activities, beneficiaries, locations }) => {
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-  <h2 className="text-2xl font-bold text-gray-800 mb-4">Geographic Distribution of Beneficiaries</h2>
-  <div style={{ height: '400px', width: '100%' }}>
-    {reportData && <Map locationDistribution={reportData.locationDistribution} />}
-  </div>
-</div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Geographic Distribution of Beneficiaries</h2>
+        <div style={{ height: '400px', width: '100%' }}>
+          {reportData && <SimpleMap locationDistribution={reportData.locationDistribution} />}
+        </div>
+      </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Indicator Tracking Table</h2>
