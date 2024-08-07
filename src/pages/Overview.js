@@ -1,7 +1,9 @@
 import React from 'react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
-const Overview = ({ beneficiaries, activities, projects }) => {
+const Overview = ({ beneficiaries, activities, projects, locations }) => {
   const totalBeneficiaries = beneficiaries.length;
   const totalActivities = activities.length;
   const totalProjects = Object.values(projects).flat().length;
@@ -39,6 +41,24 @@ const Overview = ({ beneficiaries, activities, projects }) => {
     achieved: projectDetails.reduce((sum, project) => 
       sum + project.monthlyProgress.reduce((total, month) => total + month.count, 0), 0)
   }));
+
+  // Prepare data for location-based distribution
+  const locationDistribution = activities.reduce((acc, activity) => {
+    const location = locations.find(l => l.name === activity.location);
+    if (location) {
+      if (!acc[location.name]) {
+        acc[location.name] = {
+          count: 0,
+          latitude: location.latitude,
+          longitude: location.longitude
+        };
+      }
+      acc[location.name].count++;
+    }
+    return acc;
+  }, {});
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
   return (
     <div className="p-4 bg-gray-100">
@@ -89,8 +109,13 @@ const Overview = ({ beneficiaries, activities, projects }) => {
                 fill="#8884d8"
                 dataKey="value"
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-              />
+              >
+                {beneficiaryTypePieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
               <Tooltip />
+              <Legend />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -108,6 +133,23 @@ const Overview = ({ beneficiaries, activities, projects }) => {
               <Bar dataKey="target" fill="#82ca9d" name="Target" />
             </BarChart>
           </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Geographic Distribution of Beneficiaries</h2>
+        <div style={{ height: '400px', width: '100%' }}>
+          <MapContainer center={[45.9432, 24.9668]} zoom={7} style={{ height: '100%', width: '100%' }}>
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            {Object.entries(locationDistribution).map(([name, data]) => (
+              <Marker key={name} position={[data.latitude, data.longitude]}>
+                <Popup>
+                  <strong>{name}</strong><br />
+                  People reached: {data.count}
+                </Popup>
+              </Marker>
+            ))}
+          </MapContainer>
         </div>
       </div>
     </div>

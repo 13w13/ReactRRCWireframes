@@ -179,7 +179,7 @@ const generateMockupData = (numBeneficiaries = 1000, numActivities = 5000) => {
     SEM: [
       {
         id: 'sem1',
-        name: 'Employability Support',
+        name: 'People reached with employability Support',
         target: { value: 1000, description: 'People supported' },
         linkedActivities: ['Livelihood Support', 'Language Class'],
         locations: locations,
@@ -189,7 +189,7 @@ const generateMockupData = (numBeneficiaries = 1000, numActivities = 5000) => {
       },
       {
         id: 'sem2',
-        name: 'MHPSS Services',
+        name: 'People reached with MHPSS',
         target: { value: 500, description: 'People receiving psychosocial support' },
         linkedActivities: ['MHPSS Session'],
         locations: locations,
@@ -201,7 +201,7 @@ const generateMockupData = (numBeneficiaries = 1000, numActivities = 5000) => {
     UkraineCrisis: [
       {
         id: 'ukr1',
-        name: 'Emergency Food Assistance',
+        name: 'People reached with food assistance',
         target: { value: 5000, description: 'People receiving food assistance' },
         linkedActivities: ['Food Distribution'],
         locations: locations,
@@ -211,7 +211,7 @@ const generateMockupData = (numBeneficiaries = 1000, numActivities = 5000) => {
       },
       {
         id: 'ukr2',
-        name: 'Health Services',
+        name: 'People reached with health activties',
         target: { value: 2000, description: 'Health consultations provided' },
         linkedActivities: ['Health Consultation'],
         locations: locations,

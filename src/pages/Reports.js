@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
-const Reports = ({ projects, activities, beneficiaries }) => {
+const Reports = ({ projects, activities, beneficiaries, locations }) => {
   const [selectedProject, setSelectedProject] = useState('');
   const [startDate, setStartDate] = useState('2023-01-01');
   const [endDate, setEndDate] = useState('2023-12-31');
@@ -100,10 +102,33 @@ const Reports = ({ projects, activities, beneficiaries }) => {
         return acc;
       }, {});
 
+    // Generate location-based distribution
+    const locationDistribution = activities
+      .filter(activity => 
+        activity.date >= startDate && 
+        activity.date <= endDate &&
+        projectData[0].linkedActivities.includes(activity.activityType)
+      )
+      .reduce((acc, activity) => {
+        const location = locations.find(l => l.name === activity.location);
+        if (location) {
+          if (!acc[location.name]) {
+            acc[location.name] = {
+              count: 0,
+              latitude: location.latitude,
+              longitude: location.longitude
+            };
+          }
+          acc[location.name].count++;
+        }
+        return acc;
+      }, {});
+
     setReportData({
       reachAndServicesData: reachAndServicesChartData,
       indicatorProgress,
-      beneficiaryTypeDistribution: Object.entries(beneficiaryTypeDistribution).map(([id, value]) => ({ id, value }))
+      beneficiaryTypeDistribution: Object.entries(beneficiaryTypeDistribution).map(([id, value]) => ({ id, value })),
+      locationDistribution
     });
   };
 
@@ -151,6 +176,16 @@ const Reports = ({ projects, activities, beneficiaries }) => {
     // Add beneficiary type distribution data
     const wsBeneficiaryTypes = XLSX.utils.json_to_sheet(reportData.beneficiaryTypeDistribution);
     XLSX.utils.book_append_sheet(workbook, wsBeneficiaryTypes, "Beneficiary Types");
+
+    // Add location distribution data
+    const locationData = Object.entries(reportData.locationDistribution).map(([name, data]) => ({
+      Location: name,
+      'People Reached': data.count,
+      Latitude: data.latitude,
+      Longitude: data.longitude
+    }));
+    const wsLocationDistribution = XLSX.utils.json_to_sheet(locationData);
+    XLSX.utils.book_append_sheet(workbook, wsLocationDistribution, "Location Distribution");
 
     XLSX.writeFile(workbook, `${selectedProject}_Report.xlsx`);
   };
@@ -249,6 +284,23 @@ const Reports = ({ projects, activities, beneficiaries }) => {
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Geographic Distribution of Beneficiaries</h2>
+            <div style={{ height: '400px', width: '100%' }}>
+              <MapContainer center={[45.9432, 24.9668]} zoom={7} style={{ height: '100%', width: '100%' }}>
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                {Object.entries(reportData.locationDistribution).map(([name, data]) => (
+                  <Marker key={name} position={[data.latitude, data.longitude]}>
+                    <Popup>
+                      <strong>{name}</strong><br />
+                      People reached: {data.count}
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            </div>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -357,40 +409,6 @@ const Reports = ({ projects, activities, beneficiaries }) => {
                 </div>
               </div>
             ))}
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6 mt-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">MEAL Insights</h2>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-xl font-semibold mb-2">Effectiveness</h3>
-                <p>Overall project progress: {(reportData.indicatorProgress.reduce((sum, indicator) => sum + parseFloat(indicator.progress), 0) / reportData.indicatorProgress.length).toFixed(2)}%</p>
-                <p>Total unique beneficiaries reached: {reportData.indicatorProgress.reduce((sum, indicator) => sum + indicator.uniquePeopleReached, 0)}</p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2">Efficiency</h3>
-                <p>Average services per beneficiary: {(reportData.indicatorProgress.reduce((sum, indicator) => sum + indicator.serviceCount, 0) / reportData.indicatorProgress.reduce((sum, indicator) => sum + indicator.uniquePeopleReached, 0)).toFixed(2)}</p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2">Relevance</h3>
-                <p>Most common beneficiary type: {reportData.beneficiaryTypeDistribution.reduce((a, b) => a.value > b.value ? a : b).id}</p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2">Sustainability</h3>
-                <p>Long-term impact indicators needed for assessment</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6 mt-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Recommendations</h2>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Focus on increasing reach for underrepresented beneficiary types</li>
-              <li>Consider adding more activities to indicators with low progress</li>
-              <li>Investigate reasons for any significant disparities in service provision across different demographics</li>
-              <li>Develop strategies to improve overall project progress in lagging areas</li>
-              <li>Implement regular beneficiary feedback mechanisms to ensure continued relevance and effectiveness of services</li>
-            </ul>
           </div>
         </>
       )}
