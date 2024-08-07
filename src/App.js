@@ -9,33 +9,31 @@ import DataIntegrationStatus from './pages/DataIntegrationStatus';
 
 // Import mock data
 import { beneficiaries as mockBeneficiaries, activities as mockActivities, projects as mockProjects } from './data/mockData';
-// Removed: import 'leaflet/dist/leaflet.css';
+
 const App = () => {
-  const [beneficiaries, setBeneficiaries] = useState(mockBeneficiaries);
-  const [activities, setActivities] = useState(mockActivities);
-  const [projects, setProjects] = useState(mockProjects);
+  const [beneficiaries, setBeneficiaries] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [projects, setProjects] = useState({});
 
   useEffect(() => {
-    // You can fetch real data here if needed
-    // For now, we're using mock data
+    // Simulate async data loading
+    const loadData = async () => {
+      // Add a small delay to simulate network request
+      await new Promise(resolve => setTimeout(resolve, 100));
+      setBeneficiaries(mockBeneficiaries);
+      setActivities(mockActivities);
+      setProjects(mockProjects);
+    };
+
+    loadData();
   }, []);
 
   return (
     <Router>
       <div className="flex h-screen">
+        {/* Sidebar navigation */}
         <div className="w-64 bg-gray-800 text-white">
-          <div className="bg-red-600 p-4">
-            <h1 className="text-xl font-bold">Romanian Red Cross</h1>
-            <h2 className="text-sm">Unified Beneficiary System</h2>
-          </div>
-          <nav className="mt-6">
-            <Link to="/" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Overview</Link>
-            <Link to="/beneficiaries" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Beneficiaries</Link>
-            <Link to="/activities" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Activities</Link>
-            <Link to="/projects" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Project Management</Link>
-            <Link to="/reports" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Reports</Link>
-            <Link to="/data-integration" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Data Integration</Link>
-          </nav>
+          {/* ... (navigation links) ... */}
         </div>
         <div className="flex-1 overflow-y-auto">
           <Routes>
