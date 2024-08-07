@@ -7,7 +7,7 @@ import ProjectManagement from './components/ProjectManagement';
 import Reports from './components/Reports';
 import DataIntegrationStatus from './components/DataIntegrationStatus';
 
-// Updated import path for mock data
+// Updated import statement
 import { beneficiaries as mockBeneficiaries, activities as mockActivities, projects as mockProjects } from './data/mockData';
 
 const App = () => {
