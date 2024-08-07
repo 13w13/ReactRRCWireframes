@@ -4,9 +4,6 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import Map from '../components/Map';
 
-const DynamicMap = dynamic(() => import('./Map'), {
-  ssr: false
-});
 
 const Reports = ({ projects, activities, beneficiaries, locations }) => {
   const [selectedProject, setSelectedProject] = useState('');

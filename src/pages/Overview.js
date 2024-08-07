@@ -4,10 +4,6 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import Map from '../components/Map';
 
-const DynamicMap = dynamic(() => import('./Map'), {
-  ssr: false
-});
-
 const Overview = ({ beneficiaries, activities, projects, locations }) => {
   const totalBeneficiaries = beneficiaries.length;
   const totalActivities = activities.length;
