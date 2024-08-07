@@ -68,7 +68,59 @@ const ActivitiesTable = ({ activities, setActivities }) => {
         dataType="Activities"
       />
 
-      {/* Add New Activity form remains unchanged */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Add New Activity</h2>
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <input
+            type="text"
+            name="beneficiaryId"
+            placeholder="Beneficiary ID*"
+            value={newActivity.beneficiaryId}
+            onChange={handleInputChange}
+            className="p-2 border rounded"
+          />
+          <input
+            type="text"
+            name="name"
+            placeholder="Beneficiary Name"
+            value={newActivity.name}
+            onChange={handleInputChange}
+            className="p-2 border rounded"
+          />
+          <input
+            type="text"
+            name="activityType"
+            placeholder="Activity Type*"
+            value={newActivity.activityType}
+            onChange={handleInputChange}
+            className="p-2 border rounded"
+          />
+          <input
+            type="date"
+            name="date"
+            value={newActivity.date}
+            onChange={handleInputChange}
+            className="p-2 border rounded"
+          />
+          <input
+            type="text"
+            name="location"
+            placeholder="Location"
+            value={newActivity.location}
+            onChange={handleInputChange}
+            className="p-2 border rounded"
+          />
+          <input
+            type="text"
+            name="source"
+            placeholder="Source System"
+            value={newActivity.source}
+            onChange={handleInputChange}
+            className="p-2 border rounded"
+          />
+        </div>
+        <button onClick={handleAddActivity} className="bg-blue-500 text-white px-4 py-2 rounded">Add Activity</button>
+      </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Filter Activities</h2>
@@ -137,7 +189,27 @@ const ActivitiesTable = ({ activities, setActivities }) => {
         </table>
       </div>
 
-      {/* Upload Logs section remains unchanged */}
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Upload Logs</h2>
+        <table className="w-full">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="p-2 text-left">Timestamp</th>
+              <th className="p-2 text-left">Records Count</th>
+              <th className="p-2 text-left">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+          {uploadLogs.map((log, index) => (
+              <tr key={index} className="border-b">
+                <td className="p-2">{log.timestamp}</td>
+                <td className="p-2">{log.count}</td>
+                <td className="p-2">{log.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

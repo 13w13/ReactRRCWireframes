@@ -6,8 +6,8 @@ import * as XLSX from 'xlsx';
 
 const Reports = ({ projects, activities, beneficiaries }) => {
   const [selectedProject, setSelectedProject] = useState('');
-  const [startDate, setStartDate] = useState('2024-01-01');
-  const [endDate, setEndDate] = useState('2024-12-31');
+  const [startDate, setStartDate] = useState('2023-01-01');
+  const [endDate, setEndDate] = useState('2023-12-31');
   const [reportData, setReportData] = useState(null);
 
   useEffect(() => {
@@ -21,34 +21,20 @@ const Reports = ({ projects, activities, beneficiaries }) => {
 
     const projectData = projects[selectedProject];
     
-    // Generate time series data
-    const timeSeriesData = activities
-      .filter(activity => 
-        activity.date >= startDate && 
-        activity.date <= endDate &&
-        projectData[0].linkedActivities.includes(activity.activityType)
-      )
-      .reduce((acc, activity) => {
-        const date = activity.date.slice(0, 7); // YYYY-MM
-        const existingEntry = acc.find(entry => entry.x === date);
-        if (existingEntry) {
-          existingEntry.y++;
-        } else {
-          acc.push({ x: date, y: 1 });
-        }
-        return acc;
-      }, [])
-      .sort((a, b) => a.x.localeCompare(b.x));
+    // Use the monthlyProgress data from the project
+    const timeSeriesData = projectData.flatMap(indicator => 
+      indicator.monthlyProgress.map(progress => ({
+        x: progress.month,
+        y: progress.count,
+        indicator: indicator.name
+      }))
+    );
 
     // Generate indicator progress data
     const indicatorProgress = projectData.map(indicator => ({
       indicator: indicator.name,
       target: indicator.target.value,
-      achieved: activities.filter(activity => 
-        activity.date >= startDate && 
-        activity.date <= endDate &&
-        indicator.linkedActivities.includes(activity.activityType)
-      ).length
+      achieved: indicator.monthlyProgress.reduce((sum, month) => sum + month.count, 0)
     }));
 
     // Generate beneficiary type distribution
@@ -67,7 +53,7 @@ const Reports = ({ projects, activities, beneficiaries }) => {
       }, {});
 
     setReportData({
-      timeSeriesData: [{ id: "Activities", data: timeSeriesData }],
+      timeSeriesData,
       indicatorProgress,
       beneficiaryTypeDistribution: Object.entries(beneficiaryTypeDistribution).map(([type, value]) => ({ id: type, value }))
     });
@@ -77,7 +63,7 @@ const Reports = ({ projects, activities, beneficiaries }) => {
     if (!reportData) return;
 
     const workbook = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(reportData.timeSeriesData[0].data);
+    const ws = XLSX.utils.json_to_sheet(reportData.timeSeriesData);
     XLSX.utils.book_append_sheet(workbook, ws, "Activity Data");
     XLSX.writeFile(workbook, `${selectedProject}_Report.xlsx`);
   };
@@ -125,7 +111,12 @@ const Reports = ({ projects, activities, beneficiaries }) => {
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Activity Timeline</h2>
             <div style={{ height: '400px' }}>
               <ResponsiveLine
-                data={reportData.timeSeriesData}
+                data={[
+                  {
+                    id: "Activities",
+                    data: reportData.timeSeriesData
+                  }
+                ]}
                 margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
                 xScale={{ type: 'point' }}
                 yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: true, reverse: false }}
@@ -276,9 +267,6 @@ const Reports = ({ projects, activities, beneficiaries }) => {
                     ]
                   }
                 ]}
-                animate={true}
-                motionStiffness={90}
-                motionDamping={15}
               />
             </div>
           </div>
@@ -300,26 +288,6 @@ const Reports = ({ projects, activities, beneficiaries }) => {
                 radialLabelsLinkColor={{ from: 'color' }}
                 sliceLabelsSkipAngle={10}
                 sliceLabelsTextColor="#333333"
-                defs={[
-                  {
-                    id: 'dots',
-                    type: 'patternDots',
-                    background: 'inherit',
-                    color: 'rgba(255, 255, 255, 0.3)',
-                    size: 4,
-                    padding: 1,
-                    stagger: true
-                  },
-                  {
-                    id: 'lines',
-                    type: 'patternLines',
-                    background: 'inherit',
-                    color: 'rgba(255, 255, 255, 0.3)',
-                    rotation: -45,
-                    lineWidth: 6,
-                    spacing: 10
-                  }
-                ]}
                 legends={[
                   {
                     anchor: 'bottom',
@@ -355,7 +323,7 @@ const Reports = ({ projects, activities, beneficiaries }) => {
               <tbody>
                 <tr className="border-b">
                   <td className="py-2 font-semibold">Total Activities:</td>
-                  <td className="py-2 text-right">{reportData.timeSeriesData[0].data.reduce((sum, data) => sum + data.y, 0)}</td>
+                  <td className="py-2 text-right">{reportData.timeSeriesData.reduce((sum, data) => sum + data.y, 0)}</td>
                 </tr>
                 <tr className="border-b">
                   <td className="py-2 font-semibold">Total Beneficiaries:</td>
