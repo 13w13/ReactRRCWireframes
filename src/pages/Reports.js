@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
 const Reports = ({ projects, activities, beneficiaries }) => {
   const [selectedProject, setSelectedProject] = useState('');
@@ -61,6 +62,7 @@ const Reports = ({ projects, activities, beneficiaries }) => {
         indicator: indicator.name,
         target: indicator.target.value,
         achieved: indicatorActivities.length,
+        progress: ((indicatorActivities.length / indicator.target.value) * 100).toFixed(2),
         uniquePeopleReached: uniqueBeneficiaries.size,
         serviceCount: indicatorActivities.length,
         disaggregatedData: {
@@ -130,6 +132,7 @@ const Reports = ({ projects, activities, beneficiaries }) => {
       Indicator: indicator.indicator,
       Target: indicator.target,
       Achieved: indicator.achieved,
+      Progress: `${indicator.progress}%`,
       'Unique People Reached': indicator.uniquePeopleReached,
       'Service Count': indicator.serviceCount,
       'Male': indicator.disaggregatedData.bySex.male,
@@ -151,6 +154,8 @@ const Reports = ({ projects, activities, beneficiaries }) => {
 
     XLSX.writeFile(workbook, `${selectedProject}_Report.xlsx`);
   };
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
   return (
     <div className="p-4 bg-gray-100">
@@ -193,112 +198,60 @@ const Reports = ({ projects, activities, beneficiaries }) => {
         <>
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Reach and Services</h2>
-            <div className="h-64">
-              <svg width="100%" height="100%" viewBox="0 0 600 240">
-                {reportData.reachAndServicesData.map((data, index) => (
-                  <g key={index}>
-                    <rect
-                      x={index * 40}
-                      y={240 - data.beneficiaries / 2}
-                      width="20"
-                      height={data.beneficiaries / 2}
-                      fill="#8884d8"
-                    />
-                    <rect
-                      x={index * 40 + 20}
-                      y={240 - data.services / 5}
-                      width="20"
-                      height={data.services / 5}
-                      fill="#82ca9d"
-                    />
-                    <text x={index * 40 + 10} y="235" textAnchor="middle" fontSize="10">
-                      {data.month}
-                    </text>
-                  </g>
-                ))}
-              </svg>
-            </div>
-            <div className="flex justify-center mt-4">
-              <div className="flex items-center mr-4">
-                <div className="w-4 h-4 bg-[#8884d8] mr-2"></div>
-                <span>Beneficiaries</span>
-              </div>
-              <div className="flex items-center">
-                <div className="w-4 h-4 bg-[#82ca9d] mr-2"></div>
-                <span>Services</span>
-              </div>
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={reportData.reachAndServicesData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis yAxisId="left" />
+                <YAxis yAxisId="right" orientation="right" />
+                <Tooltip />
+                <Legend />
+                <Line yAxisId="left" type="monotone" dataKey="beneficiaries" stroke="#8884d8" name="Unique Beneficiaries" />
+                <Line yAxisId="right" type="monotone" dataKey="services" stroke="#82ca9d" name="Services Provided" />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Indicator Progress</h2>
-            <div className="h-64">
-              <svg width="100%" height="100%" viewBox="0 0 600 240">
-                {reportData.indicatorProgress.map((indicator, index) => (
-                  <g key={index} transform={`translate(0, ${index * 40})`}>
-                    <text x="0" y="15" fontSize="12">{indicator.indicator}</text>
-                    <rect x="200" y="0" width="300" height="20" fill="#e0e0e0" />
-                    <rect
-                      x="200"
-                      y="0"
-                      width={(indicator.achieved / indicator.target) * 300}
-                      height="20"
-                      fill="#82ca9d"
-                    />
-                    <text x="510" y="15" fontSize="12">{`${indicator.achieved}/${indicator.target}`}</text>
-                  </g>
-                ))}
-              </svg>
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={reportData.indicatorProgress}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="indicator" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="achieved" fill="#82ca9d" name="Achieved" />
+                <Bar dataKey="target" fill="#8884d8" name="Target" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Type Distribution</h2>
-            <div className="h-64">
-              <svg width="100%" height="100%" viewBox="0 0 300 300">
-                {reportData.beneficiaryTypeDistribution.map((data, index, array) => {
-                  const total = array.reduce((sum, item) => sum + item.value, 0);
-                  const startAngle = index === 0 ? 0 : array
-                    .slice(0, index)
-                    .reduce((sum, item) => sum + (item.value / total) * 360, 0);
-                  const endAngle = startAngle + (data.value / total) * 360;
-
-                  const startRadians = (startAngle * Math.PI) / 180;
-                  const endRadians = (endAngle * Math.PI) / 180;
-
-                  const x1 = 150 + 100 * Math.cos(startRadians);
-                  const y1 = 150 + 100 * Math.sin(startRadians);
-                  const x2 = 150 + 100 * Math.cos(endRadians);
-                  const y2 = 150 + 100 * Math.sin(endRadians);
-
-                  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-
-                  const pathData = [
-                    `M 150 150`,
-                    `L ${x1} ${y1}`,
-                    `A 100 100 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-                    `Z`
-                  ].join(" ");
-
-                  return (
-                    <g key={data.id}>
-                      <path d={pathData} fill={`hsl(${index * 60}, 70%, 50%)`} />
-                      <text
-                        x={150 + 120 * Math.cos((startAngle + endAngle) / 2 * Math.PI / 180)}
-                        y={150 + 120 * Math.sin((startAngle + endAngle) / 2 * Math.PI / 180)}
-                        textAnchor="middle"
-                        fontSize="12"
-                      >
-                        {data.id}: {((data.value / total) * 100).toFixed(1)}%
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={reportData.beneficiaryTypeDistribution}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {reportData.beneficiaryTypeDistribution.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Indicator Tracking Table</h2>
             <table className="min-w-full bg-white">
               <thead>
@@ -312,13 +265,16 @@ const Reports = ({ projects, activities, beneficiaries }) => {
                 </tr>
               </thead>
               <tbody>
-              {reportData.indicatorProgress.map((indicator, index) => (
+                {reportData.indicatorProgress.map((indicator, index) => (
                   <tr key={index} className="border-b">
                     <td className="py-2 px-4">{indicator.indicator}</td>
                     <td className="py-2 px-4">{indicator.target}</td>
                     <td className="py-2 px-4">{indicator.achieved}</td>
                     <td className="py-2 px-4">
-                      {((indicator.achieved / indicator.target) * 100).toFixed(2)}%
+                      <div className="w-full bg-gray-200 rounded-full h-2.5">
+                        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${indicator.progress}%` }}></div>
+                      </div>
+                      <span className="text-sm">{indicator.progress}%</span>
                     </td>
                     <td className="py-2 px-4">{indicator.uniquePeopleReached}</td>
                     <td className="py-2 px-4">{indicator.serviceCount}</td>
@@ -336,26 +292,105 @@ const Reports = ({ projects, activities, beneficiaries }) => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <h4 className="font-semibold mb-2">By Sex</h4>
-                    <p>Male: {indicator.disaggregatedData.bySex.male}</p>
-                    <p>Female: {indicator.disaggregatedData.bySex.female}</p>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'Male', value: indicator.disaggregatedData.bySex.male },
+                            { name: 'Female', value: indicator.disaggregatedData.bySex.female }
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          <Cell fill="#0088FE" />
+                          <Cell fill="#00C49F" />
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
                   <div>
                     <h4 className="font-semibold mb-2">By Age</h4>
-                    <p>Children: {indicator.disaggregatedData.byAge.children}</p>
-                    <p>Adults: {indicator.disaggregatedData.byAge.adults}</p>
-                    <p>Elderly: {indicator.disaggregatedData.byAge.elderly}</p>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: 'Children', value: indicator.disaggregatedData.byAge.children },
+                            { name: 'Adults', value: indicator.disaggregatedData.byAge.adults },
+                            { name: 'Elderly', value: indicator.disaggregatedData.byAge.elderly }
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          <Cell fill="#FFBB28" />
+                          <Cell fill="#FF8042" />
+                          <Cell fill="#8884d8" />
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
                 <div className="mt-4">
                   <h4 className="font-semibold mb-2">By Nationality</h4>
-                  <div className="grid grid-cols-3 gap-2">
-                    {Object.entries(indicator.disaggregatedData.byNationality).map(([nationality, count], i) => (
-                      <p key={i}>{nationality}: {count}</p>
-                    ))}
-                  </div>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={Object.entries(indicator.disaggregatedData.byNationality).map(([name, value]) => ({ name, value }))}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#82ca9d" />
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6 mt-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">MEAL Insights</h2>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-xl font-semibold mb-2">Effectiveness</h3>
+                <p>Overall project progress: {(reportData.indicatorProgress.reduce((sum, indicator) => sum + parseFloat(indicator.progress), 0) / reportData.indicatorProgress.length).toFixed(2)}%</p>
+                <p>Total unique beneficiaries reached: {reportData.indicatorProgress.reduce((sum, indicator) => sum + indicator.uniquePeopleReached, 0)}</p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2">Efficiency</h3>
+                <p>Average services per beneficiary: {(reportData.indicatorProgress.reduce((sum, indicator) => sum + indicator.serviceCount, 0) / reportData.indicatorProgress.reduce((sum, indicator) => sum + indicator.uniquePeopleReached, 0)).toFixed(2)}</p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2">Relevance</h3>
+                <p>Most common beneficiary type: {reportData.beneficiaryTypeDistribution.reduce((a, b) => a.value > b.value ? a : b).id}</p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2">Sustainability</h3>
+                <p>Long-term impact indicators needed for assessment</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6 mt-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Recommendations</h2>
+            <ul className="list-disc pl-5 space-y-2">
+              <li>Focus on increasing reach for underrepresented beneficiary types</li>
+              <li>Consider adding more activities to indicators with low progress</li>
+              <li>Investigate reasons for any significant disparities in service provision across different demographics</li>
+              <li>Develop strategies to improve overall project progress in lagging areas</li>
+              <li>Implement regular beneficiary feedback mechanisms to ensure continued relevance and effectiveness of services</li>
+            </ul>
           </div>
         </>
       )}
