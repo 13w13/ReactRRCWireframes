@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import DataUpload from '../components/DataUpload';
+import DataUpload from './components/DataUpload';
 
 const ActivitiesTable = ({ activities, setActivities }) => {
   const [newActivity, setNewActivity] = useState({
