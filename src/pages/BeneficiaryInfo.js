@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DataUpload from './DataUpload';
+import DataUpload from '../components/DataUpload';
 
 const beneficiaryTemplateFields = [
   'id', 'name', 'dateOfBirth', 'gender', 'nationality', 'beneficiaryType',
@@ -11,6 +11,9 @@ const beneficiaryTemplateFields = [
 const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
   const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
   const [uploadLogs, setUploadLogs] = useState([]);
+  const [filter, setFilter] = useState({ beneficiaryType: '', nationality: '' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const handleRowClick = (beneficiary) => {
     setSelectedBeneficiary(beneficiary);
@@ -34,6 +37,24 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
     }]);
   };
 
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilter(prev => ({ ...prev, [name]: value }));
+    setCurrentPage(1);
+  };
+
+  const filteredBeneficiaries = beneficiaries.filter(beneficiary => 
+    (!filter.beneficiaryType || beneficiary.beneficiaryType === filter.beneficiaryType) &&
+    (!filter.nationality || beneficiary.nationality === filter.nationality)
+  );
+
+  const paginatedBeneficiaries = filteredBeneficiaries.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredBeneficiaries.length / itemsPerPage);
+
   return (
     <div className="p-4 bg-gray-100">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Beneficiary Information</h1>
@@ -43,6 +64,34 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
         templateFields={beneficiaryTemplateFields}
         dataType="Beneficiaries"
       />
+
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Filter Beneficiaries</h2>
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <select
+            name="beneficiaryType"
+            value={filter.beneficiaryType}
+            onChange={handleFilterChange}
+            className="p-2 border rounded"
+          >
+            <option value="">All Beneficiary Types</option>
+            {[...new Set(beneficiaries.map(b => b.beneficiaryType))].map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+          <select
+            name="nationality"
+            value={filter.nationality}
+            onChange={handleFilterChange}
+            className="p-2 border rounded"
+          >
+            <option value="">All Nationalities</option>
+            {[...new Set(beneficiaries.map(b => b.nationality))].map(nationality => (
+              <option key={nationality} value={nationality}>{nationality}</option>
+            ))}
+          </select>
+        </div>
+      </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiaries List</h2>
@@ -58,7 +107,7 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
             </tr>
           </thead>
           <tbody>
-            {beneficiaries.map((beneficiary) => (
+            {paginatedBeneficiaries.map((beneficiary) => (
               <tr
                 key={beneficiary.id}
                 className="cursor-pointer hover:bg-gray-100"
@@ -74,6 +123,23 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
             ))}
           </tbody>
         </table>
+        <div className="mt-4 flex justify-between items-center">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
+          >
+            Previous
+          </button>
+          <span>{currentPage} of {totalPages}</span>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
+          >
+            Next
+          </button>
+        </div>
       </div>
 
       {selectedBeneficiary && (

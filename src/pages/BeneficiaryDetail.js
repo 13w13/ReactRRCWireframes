@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DataUpload from './DataUpload';
+import DataUpload from '.components/DataUpload';
 
 const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
   const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
