@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 
 const mockSyncStatus = [
-  { source: 'EspoCRM', lastSync: '2024-08-05 14:30:00', status: 'success' },
-  { source: 'Easy Medical', lastSync: '2024-08-06 09:15:00', status: 'success' },
-  { source: 'Humanity Concept Store', lastSync: '2024-08-04 18:45:00', status: 'failed' },
+  { source: 'EspoCRM', lastSync: '2024-08-05 14:30:00', status: 'success', records: 150 },
+  { source: 'Easy Medical', lastSync: '2024-08-06 09:15:00', status: 'success', records: 75 },
+  { source: 'Humanity Concept Store', lastSync: '2024-08-04 18:45:00', status: 'failed', records: 0 },
+  { source: 'Access RC', lastSync: '2024-08-05 10:00:00', status: 'success', records: 50 },
+  { source: 'Kobo Toolbox', lastSync: '2024-08-06 08:00:00', status: 'success', records: 100 },
 ];
 
 const mockSyncLogs = [
-  { id: 1, timestamp: '2024-08-06 09:15:00', source: 'Easy Medical', action: 'Sync', status: 'Success', details: 'Synced 150 records' },
-  { id: 2, timestamp: '2024-08-05 14:30:00', source: 'EspoCRM', action: 'Sync', status: 'Success', details: 'Synced 200 records' },
+  { id: 1, timestamp: '2024-08-06 09:15:00', source: 'Easy Medical', action: 'Sync', status: 'Success', details: 'Synced 75 records' },
+  { id: 2, timestamp: '2024-08-05 14:30:00', source: 'EspoCRM', action: 'Sync', status: 'Success', details: 'Synced 150 records' },
   { id: 3, timestamp: '2024-08-04 18:45:00', source: 'Humanity Concept Store', action: 'Sync', status: 'Failed', details: 'Connection timeout' },
+  { id: 4, timestamp: '2024-08-05 10:00:00', source: 'Access RC', action: 'Sync', status: 'Success', details: 'Synced 50 records' },
+  { id: 5, timestamp: '2024-08-06 08:00:00', source: 'Kobo Toolbox', action: 'Sync', status: 'Success', details: 'Synced 100 records' },
 ];
 
 const DataIntegrationStatus = () => {
@@ -43,6 +47,7 @@ const DataIntegrationStatus = () => {
                   <th className="p-2 text-left">Data Source</th>
                   <th className="p-2 text-left">Last Sync</th>
                   <th className="p-2 text-left">Status</th>
+                  <th className="p-2 text-left">Records Synced</th>
                 </tr>
               </thead>
               <tbody>
@@ -55,6 +60,7 @@ const DataIntegrationStatus = () => {
                         {item.status === 'success' ? 'Synced' : 'Failed'}
                       </span>
                     </td>
+                    <td className="p-2">{item.records}</td>
                   </tr>
                 ))}
               </tbody>

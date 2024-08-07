@@ -1,77 +1,66 @@
 import React from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
-const Dashboard = () => {
-  const mockData = [
-    { month: 'Jan', beneficiaries: 1000, services: 1500 },
-    { month: 'Feb', beneficiaries: 2200, services: 3300 },
-    { month: 'Mar', beneficiaries: 3500, services: 5200 },
-    { month: 'Apr', beneficiaries: 5000, services: 7500 },
-    { month: 'May', beneficiaries: 6800, services: 10200 },
-    { month: 'Jun', beneficiaries: 9000, services: 13500 },
-  ];
+const Overview = ({ beneficiaries, activities, projects }) => {
+  // Calculate statistics
+  const totalBeneficiaries = beneficiaries.length;
+  const totalActivities = activities.length;
+  const totalProjects = Object.keys(projects).length;
+
+  // Prepare data for the chart
+  const chartData = activities.reduce((acc, activity) => {
+    const date = activity.date.slice(0, 7); // Get YYYY-MM
+    const existingEntry = acc.find(entry => entry.month === date);
+    if (existingEntry) {
+      existingEntry.activities++;
+      if (!existingEntry.beneficiaries.includes(activity.beneficiaryId)) {
+        existingEntry.beneficiaries.push(activity.beneficiaryId);
+      }
+    } else {
+      acc.push({ month: date, activities: 1, beneficiaries: [activity.beneficiaryId] });
+    }
+    return acc;
+  }, []).map(entry => ({
+    ...entry,
+    beneficiaries: entry.beneficiaries.length,
+  })).sort((a, b) => a.month.localeCompare(b.month));
 
   return (
     <div className="p-4 bg-gray-100">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Unified Beneficiary System Dashboard</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-lg shadow-md p-4">
           <h2 className="text-xl font-semibold mb-2">Total Beneficiaries</h2>
-          <p className="text-3xl font-bold text-blue-600">9,000</p>
+          <p className="text-3xl font-bold text-blue-600">{totalBeneficiaries}</p>
         </div>
         <div className="bg-white rounded-lg shadow-md p-4">
-          <h2 className="text-xl font-semibold mb-2">Total Services Provided</h2>
-          <p className="text-3xl font-bold text-green-600">13,500</p>
+          <h2 className="text-xl font-semibold mb-2">Total Activities</h2>
+          <p className="text-3xl font-bold text-green-600">{totalActivities}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <h2 className="text-xl font-semibold mb-2">Active Projects</h2>
+          <p className="text-3xl font-bold text-purple-600">{totalProjects}</p>
         </div>
       </div>
       
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Cumulative Reach and Services</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Monthly Activities and Beneficiaries</h2>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={mockData}>
+          <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
-            <YAxis />
+            <YAxis yAxisId="left" />
+            <YAxis yAxisId="right" orientation="right" />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="beneficiaries" stroke="#8884d8" name="Beneficiaries" />
-            <Line type="monotone" dataKey="services" stroke="#82ca9d" name="Services" />
+            <Line yAxisId="left" type="monotone" dataKey="activities" stroke="#8884d8" name="Activities" />
+            <Line yAxisId="right" type="monotone" dataKey="beneficiaries" stroke="#82ca9d" name="Unique Beneficiaries" />
           </LineChart>
         </ResponsiveContainer>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Data Integration Status</h2>
-        <table className="w-full">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="p-2 text-left">Source System</th>
-              <th className="p-2 text-left">Last Sync</th>
-              <th className="p-2 text-left">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b">
-              <td className="p-2">EspoCRM</td>
-              <td className="p-2">2024-08-06 10:30 AM</td>
-              <td className="p-2"><span className="px-2 py-1 bg-green-500 text-white rounded">Synced</span></td>
-            </tr>
-            <tr className="border-b">
-              <td className="p-2">Easy Medical</td>
-              <td className="p-2">2024-08-06 09:45 AM</td>
-              <td className="p-2"><span className="px-2 py-1 bg-green-500 text-white rounded">Synced</span></td>
-            </tr>
-            <tr>
-              <td className="p-2">Humanity Concept Store</td>
-              <td className="p-2">2024-08-05 11:15 PM</td>
-              <td className="p-2"><span className="px-2 py-1 bg-yellow-500 text-white rounded">Pending</span></td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
   );
 };
 
-export default Dashboard;
+export default Overview;
