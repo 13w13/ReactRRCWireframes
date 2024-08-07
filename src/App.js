@@ -8,7 +8,7 @@ import Reports from './components/Reports';
 import DataIntegrationStatus from './components/DataIntegrationStatus';
 
 // Import mock data
-import { beneficiaries as mockBeneficiaries, activities as mockActivities, projects as mockProjects } from './mockData';
+import { beneficiaries as mockBeneficiaries, activities as mockActivities, projects as mockProjects } from './data/mockData';
 const App = () => {
   const [beneficiaries, setBeneficiaries] = useState(mockBeneficiaries);
   const [activities, setActivities] = useState(mockActivities);
