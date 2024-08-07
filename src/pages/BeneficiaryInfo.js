@@ -5,18 +5,20 @@ const beneficiaryTemplateFields = [
   'id', 'name', 'dateOfBirth', 'gender', 'nationality', 'beneficiaryType',
   'temporaryProtectionNumber', 'familyMembers', 'registrationDate', 'branch',
   'educationLevel', 'occupation', 'vulnerability', 'householdSize', 'incomeLevel',
-  'lastActivityType', 'lastActivityDate', 'lastActivityLocation'
+  'lastActivityType', 'lastActivityDate', 'lastActivityLocation', 'source'
 ];
 
 const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
   const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
   const [uploadLogs, setUploadLogs] = useState([]);
-  const [filter, setFilter] = useState({ beneficiaryType: '', nationality: '' });
+  const [filter, setFilter] = useState({ beneficiaryType: '', nationality: '', source: '' });
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [showModal, setShowModal] = useState(false);
 
   const handleRowClick = (beneficiary) => {
     setSelectedBeneficiary(beneficiary);
+    setShowModal(true);
   };
 
   const handleDataUploaded = (uploadedData) => {
@@ -45,15 +47,15 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
 
   const filteredBeneficiaries = beneficiaries.filter(beneficiary => 
     (!filter.beneficiaryType || beneficiary.beneficiaryType === filter.beneficiaryType) &&
-    (!filter.nationality || beneficiary.nationality === filter.nationality)
+    (!filter.nationality || beneficiary.nationality === filter.nationality) &&
+    (!filter.source || beneficiary.source === filter.source)
   );
 
+  const totalPages = Math.ceil(filteredBeneficiaries.length / itemsPerPage);
   const paginatedBeneficiaries = filteredBeneficiaries.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  const totalPages = Math.ceil(filteredBeneficiaries.length / itemsPerPage);
 
   return (
     <div className="p-4 bg-gray-100">
@@ -67,7 +69,7 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Filter Beneficiaries</h2>
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-3 gap-4 mb-4">
           <select
             name="beneficiaryType"
             value={filter.beneficiaryType}
@@ -90,11 +92,34 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
               <option key={nationality} value={nationality}>{nationality}</option>
             ))}
           </select>
+          <select
+            name="source"
+            value={filter.source}
+            onChange={handleFilterChange}
+            className="p-2 border rounded"
+          >
+            <option value="">All Sources</option>
+            {[...new Set(beneficiaries.map(b => b.source))].map(source => (
+              <option key={source} value={source}>{source}</option>
+            ))}
+          </select>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiaries List</h2>
+        <div className="mb-4">
+          <label className="mr-2">Items per page:</label>
+          <select
+            value={itemsPerPage}
+            onChange={(e) => setItemsPerPage(Number(e.target.value))}
+            className="p-2 border rounded"
+          >
+            <option value={10}>10</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+        </div>
         <table className="min-w-full bg-white">
           <thead>
             <tr className="bg-gray-200">
@@ -104,6 +129,7 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
               <th className="py-2 px-4 border-b">Beneficiary Type</th>
               <th className="py-2 px-4 border-b">Registration Date</th>
               <th className="py-2 px-4 border-b">Branch</th>
+              <th className="py-2 px-4 border-b">Source</th>
             </tr>
           </thead>
           <tbody>
@@ -119,6 +145,7 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
                 <td className="py-2 px-4 border-b">{beneficiary.beneficiaryType}</td>
                 <td className="py-2 px-4 border-b">{beneficiary.registrationDate}</td>
                 <td className="py-2 px-4 border-b">{beneficiary.branch}</td>
+                <td className="py-2 px-4 border-b">{beneficiary.source}</td>
               </tr>
             ))}
           </tbody>
@@ -142,39 +169,39 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
         </div>
       </div>
 
-      {selectedBeneficiary && (
-        <div className="mt-6 bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Details</h2>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div>
-              <p><strong>ID:</strong> {selectedBeneficiary.id}</p>
-              <p><strong>Name:</strong> {selectedBeneficiary.name}</p>
-              <p><strong>Date of Birth:</strong> {selectedBeneficiary.dateOfBirth}</p>
-              <p><strong>Gender:</strong> {selectedBeneficiary.gender}</p>
-              <p><strong>Nationality:</strong> {selectedBeneficiary.nationality}</p>
-              <p><strong>Beneficiary Type:</strong> {selectedBeneficiary.beneficiaryType}</p>
-              <p><strong>Temporary Protection Number:</strong> {selectedBeneficiary.temporaryProtectionNumber || 'N/A'}</p>
-              <p><strong>Registration Date:</strong> {selectedBeneficiary.registrationDate}</p>
-              <p><strong>Branch:</strong> {selectedBeneficiary.branch}</p>
-            </div>
-            <div>
-              <p><strong>Education Level:</strong> {selectedBeneficiary.educationLevel}</p>
-              <p><strong>Occupation:</strong> {selectedBeneficiary.occupation}</p>
-              <p><strong>Vulnerability:</strong> {selectedBeneficiary.vulnerability}</p>
-              <p><strong>Household Size:</strong> {selectedBeneficiary.householdSize}</p>
-              <p><strong>Income Level:</strong> {selectedBeneficiary.incomeLevel}</p>
+      {showModal && selectedBeneficiary && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={() => setShowModal(false)}>
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
+            <div className="mt-3 text-center">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">{selectedBeneficiary.name}</h3>
+              <div className="mt-2 px-7 py-3">
+                <p className="text-sm text-gray-500">
+                  ID: {selectedBeneficiary.id}<br />
+                  Nationality: {selectedBeneficiary.nationality}<br />
+                  Beneficiary Type: {selectedBeneficiary.beneficiaryType}<br />
+                  Registration Date: {selectedBeneficiary.registrationDate}<br />
+                  Branch: {selectedBeneficiary.branch}<br />
+                  Source: {selectedBeneficiary.source}<br />
+                  Date of Birth: {selectedBeneficiary.dateOfBirth}<br />
+                  Gender: {selectedBeneficiary.gender}<br />
+                  Education Level: {selectedBeneficiary.educationLevel}<br />
+                  Occupation: {selectedBeneficiary.occupation}<br />
+                  Vulnerability: {selectedBeneficiary.vulnerability}<br />
+                  Household Size: {selectedBeneficiary.householdSize}<br />
+                  Income Level: {selectedBeneficiary.incomeLevel}<br />
+                </p>
+              </div>
+              <div className="items-center px-4 py-3">
+                <button
+                  id="ok-btn"
+                  className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  onClick={() => setShowModal(false)}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
-          <h3 className="text-xl font-semibold mt-4 mb-2">Family Members</h3>
-          <ul className="list-disc pl-5 mb-4">
-            {selectedBeneficiary.familyMembers.map((member, index) => (
-              <li key={index}>{member.name} - {member.relation}</li>
-            ))}
-          </ul>
-          <h3 className="text-xl font-semibold mt-4 mb-2">Last Activity</h3>
-          <p><strong>Type:</strong> {selectedBeneficiary.lastActivity.type}</p>
-          <p><strong>Date:</strong> {selectedBeneficiary.lastActivity.date}</p>
-          <p><strong>Location:</strong> {selectedBeneficiary.lastActivity.location}</p>
         </div>
       )}
 

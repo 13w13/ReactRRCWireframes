@@ -5,6 +5,9 @@ import BeneficiaryInfo from './pages/BeneficiaryInfo';
 import ActivitiesTable from './pages/ActivitiesTable';
 import ProjectManagement from './pages/ProjectManagement';
 import Reports from './pages/Reports';
+import DataIntegrationStatus from './pages/DataIntegrationStatus';
+
+// Import mock data
 import { beneficiaries as mockBeneficiaries, activities as mockActivities, projects as mockProjects } from './data/mockData';
 
 const App = () => {
@@ -31,6 +34,7 @@ const App = () => {
             <Link to="/activities" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Activities</Link>
             <Link to="/projects" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Project Management</Link>
             <Link to="/reports" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Reports</Link>
+            <Link to="/data-integration" className="block w-full text-left px-4 py-2 hover:bg-gray-700">Data Integration</Link>
           </nav>
         </div>
         <div className="flex-1 overflow-y-auto">
@@ -40,6 +44,7 @@ const App = () => {
             <Route path="/activities" element={<ActivitiesTable activities={activities} setActivities={setActivities} />} />
             <Route path="/projects" element={<ProjectManagement projects={projects} setProjects={setProjects} />} />
             <Route path="/reports" element={<Reports projects={projects} activities={activities} beneficiaries={beneficiaries} />} />
+            <Route path="/data-integration" element={<DataIntegrationStatus />} />
           </Routes>
         </div>
       </div>
