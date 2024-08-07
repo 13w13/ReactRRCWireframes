@@ -19,6 +19,7 @@ const App = () => {
   useEffect(() => {
     // Simulate async data loading
     const loadData = async () => {
+      // Add a small delay to simulate network request
       await new Promise(resolve => setTimeout(resolve, 100));
       setBeneficiaries(mockBeneficiaries);
       setActivities(mockActivities);
@@ -52,7 +53,7 @@ const App = () => {
         <div className="flex-1 overflow-y-auto">
           <Routes>
             <Route path="/" element={<Overview beneficiaries={beneficiaries} activities={activities} projects={projects} locations={locations} />} />
-            <Route path="/beneficiaries" element={<BeneficiaryInfo beneficiaries={beneficiaries} setBeneficiaries={setBeneficiaries} />} />
+            <Route path="/beneficiaries" element={<BeneficiaryInfo beneficiaries={beneficiaries} setBeneficiaries={setBeneficiaries} activities={activities} />} />
             <Route path="/activities" element={<ActivitiesTable activities={activities} setActivities={setActivities} />} />
             <Route path="/projects" element={<ProjectManagement projects={projects} setProjects={setProjects} />} />
             <Route path="/reports" element={<Reports projects={projects} activities={activities} beneficiaries={beneficiaries} locations={locations} />} />

@@ -1,25 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DataUpload from '../components/DataUpload';
+import BeneficiaryJourney from '../components/BeneficiaryJourney';
 
-const beneficiaryTemplateFields = [
-  'id', 'name', 'dateOfBirth', 'gender', 'nationality', 'beneficiaryType',
-  'temporaryProtectionNumber', 'familyMembers', 'registrationDate', 'branch',
-  'educationLevel', 'occupation', 'vulnerability', 'householdSize', 'incomeLevel',
-  'lastActivityType', 'lastActivityDate', 'lastActivityLocation', 'source'
-];
-
-const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
+const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries, activities }) => {
   const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
   const [uploadLogs, setUploadLogs] = useState([]);
   const [filter, setFilter] = useState({ beneficiaryType: '', nationality: '', source: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showModal, setShowModal] = useState(false);
-
-  const handleRowClick = (beneficiary) => {
-    setSelectedBeneficiary(beneficiary);
-    setShowModal(true);
-  };
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
 
   const handleDataUploaded = (uploadedData) => {
     const newBeneficiaries = uploadedData.map(beneficiary => ({
@@ -57,13 +47,41 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
     currentPage * itemsPerPage
   );
 
+  const handleRowClick = (beneficiary) => {
+    setSelectedBeneficiary(beneficiary);
+    setShowModal(true);
+    // Set default date range to last 6 months
+    const end = new Date();
+    const start = new Date(end.getFullYear(), end.getMonth() - 6, 1);
+    setDateRange({
+      start: start.toISOString().split('T')[0],
+      end: end.toISOString().split('T')[0]
+    });
+  };
+
+  const getBeneficiaryActivities = () => {
+    if (!selectedBeneficiary) return [];
+    return activities
+      .filter(activity => 
+        activity.beneficiaryId === selectedBeneficiary.id &&
+        new Date(activity.date) >= new Date(dateRange.start) &&
+        new Date(activity.date) <= new Date(dateRange.end)
+      )
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+  };
+
   return (
     <div className="p-4 bg-gray-100">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Beneficiary Information</h1>
 
       <DataUpload 
         onDataUploaded={handleDataUploaded}
-        templateFields={beneficiaryTemplateFields}
+        templateFields={[
+          'id', 'name', 'dateOfBirth', 'gender', 'nationality', 'beneficiaryType',
+          'temporaryProtectionNumber', 'familyMembers', 'registrationDate', 'branch',
+          'educationLevel', 'occupation', 'vulnerability', 'householdSize', 'incomeLevel',
+          'lastActivityType', 'lastActivityDate', 'lastActivityLocation', 'source'
+        ]}
         dataType="Beneficiaries"
       />
 
@@ -171,25 +189,48 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
 
       {showModal && selectedBeneficiary && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={() => setShowModal(false)}>
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
-            <div className="mt-3 text-center">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
+            <div className="mt-3">
               <h3 className="text-lg leading-6 font-medium text-gray-900">{selectedBeneficiary.name}</h3>
               <div className="mt-2 px-7 py-3">
-                <p className="text-sm text-gray-500">
-                  ID: {selectedBeneficiary.id}<br />
-                  Nationality: {selectedBeneficiary.nationality}<br />
-                  Beneficiary Type: {selectedBeneficiary.beneficiaryType}<br />
-                  Registration Date: {selectedBeneficiary.registrationDate}<br />
-                  Branch: {selectedBeneficiary.branch}<br />
-                  Source: {selectedBeneficiary.source}<br />
-                  Date of Birth: {selectedBeneficiary.dateOfBirth}<br />
-                  Gender: {selectedBeneficiary.gender}<br />
-                  Education Level: {selectedBeneficiary.educationLevel}<br />
-                  Occupation: {selectedBeneficiary.occupation}<br />
-                  Vulnerability: {selectedBeneficiary.vulnerability}<br />
-                  Household Size: {selectedBeneficiary.householdSize}<br />
-                  Income Level: {selectedBeneficiary.incomeLevel}<br />
-                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p><strong>ID:</strong> {selectedBeneficiary.id}</p>
+                    <p><strong>Nationality:</strong> {selectedBeneficiary.nationality}</p>
+                    <p><strong>Beneficiary Type:</strong> {selectedBeneficiary.beneficiaryType}</p>
+                    <p><strong>Registration Date:</strong> {selectedBeneficiary.registrationDate}</p>
+                    <p><strong>Branch:</strong> {selectedBeneficiary.branch}</p>
+                    <p><strong>Source:</strong> {selectedBeneficiary.source}</p>
+                  </div>
+                  <div>
+                    <p><strong>Date of Birth:</strong> {selectedBeneficiary.dateOfBirth}</p>
+                    <p><strong>Gender:</strong> {selectedBeneficiary.gender}</p>
+                    <p><strong>Education Level:</strong> {selectedBeneficiary.educationLevel}</p>
+                    <p><strong>Occupation:</strong> {selectedBeneficiary.occupation}</p>
+                    <p><strong>Vulnerability:</strong> {selectedBeneficiary.vulnerability}</p>
+                    <p><strong>Household Size:</strong> {selectedBeneficiary.householdSize}</p>
+                    <p><strong>Income Level:</strong> {selectedBeneficiary.incomeLevel}</p>
+                  </div>
+                </div>
+                
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold mb-2">Beneficiary Journey</h4>
+                  <div className="flex space-x-4 mb-4">
+                    <input
+                      type="date"
+                      value={dateRange.start}
+                      onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                      className="border rounded px-2 py-1"
+                    />
+                    <input
+                      type="date"
+                      value={dateRange.end}
+                      onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                      className="border rounded px-2 py-1"
+                    />
+                  </div>
+                  <BeneficiaryJourney activities={getBeneficiaryActivities()} />
+                </div>
               </div>
               <div className="items-center px-4 py-3">
                 <button
