@@ -50,7 +50,8 @@ const generateActivities = (beneficiaries, numActivities) => {
     { name: 'Timisoara Branch', latitude: 45.7489, longitude: 21.2087 },
     { name: 'Constanta Branch', latitude: 44.1598, longitude: 28.6348 },
     { name: 'Mobile Clinic', latitude: 45.9432, longitude: 24.9668 }, // Center of Romania as default
-  ];  
+  ];
+
   const sourceSystemMap = {
     'Cash Assistance': 'Access RC',
     'Health Consultation': 'Easy Medical',
@@ -231,14 +232,13 @@ const generateMockupData = (numBeneficiaries = 1000, numActivities = 5000) => {
   // Simulate project progress
   simulateProjectProgress(projects, activities);
 
-  return { beneficiaries, activities, projects };
+  return { beneficiaries, activities, projects, locations };
 };
 
 // Generate the mockup data
 const { beneficiaries, activities, projects } = generateMockupData();
 
-export { beneficiaries, activities, projects };
-
+export { beneficiaries, activities, projects, locations };
           
 
 
