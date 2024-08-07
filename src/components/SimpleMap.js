@@ -1,44 +1,44 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+mapboxgl.accessToken = 'pk.eyJ1IjoiZ28taWZyYyIsImEiOiJja3E2bGdvb3QwaXM5MnZtbXN2eGtmaWgwIn0.llipq3Spc_PPA2bLjPwIPQ';
 
 const SimpleMap = ({ locationDistribution }) => {
-  const minLat = 43.5;
-  const maxLat = 48.5;
-  const minLong = 20;
-  const maxLong = 30;
-  const width = 400;
-  const height = 300;
+  const mapContainer = useRef(null);
+  const map = useRef(null);
 
-  const convertToSVGCoords = (lat, long) => {
-    const x = ((long - minLong) / (maxLong - minLong)) * width;
-    const y = height - ((lat - minLat) / (maxLat - minLat)) * height;
-    return { x, y };
-  };
+  useEffect(() => {
+    if (map.current) return; // initialize map only once
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/go-ifrc/ckrfe16ru4c8718phmckdfjh0',
+      center: [26.1025, 44.4268], // center on Romania
+      zoom: 6
+    });
 
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: '400px' }}>
-      <path
-        d="M50,150 L100,50 L300,50 L350,150 L300,250 L100,250 Z"
-        fill="#f0f0f0"
-        stroke="#000"
-        strokeWidth="2"
-      />
-      {Object.entries(locationDistribution).map(([name, data]) => {
-        const { x, y } = convertToSVGCoords(data.latitude, data.longitude);
-        return (
-          <g key={name}>
-            <circle
-              cx={x}
-              cy={y}
-              r={5 + Math.sqrt(data.count)}
-              fill="red"
-              opacity="0.7"
-            />
-            <text x={x} y={y - 10} fontSize="10" textAnchor="middle">{name}</text>
-          </g>
-        );
-      })}
-    </svg>
-  );
+    map.current.on('load', () => {
+      // Add markers for each location
+      Object.entries(locationDistribution).forEach(([name, data]) => {
+        const el = document.createElement('div');
+        el.className = 'marker';
+        el.style.backgroundColor = 'red';
+        el.style.width = '10px';
+        el.style.height = '10px';
+        el.style.borderRadius = '50%';
+
+        new mapboxgl.Marker(el)
+          .setLngLat([data.longitude, data.latitude])
+          .setPopup(
+            new mapboxgl.Popup({ offset: 25 })
+              .setHTML(`<h3>${name}</h3><p>People reached: ${data.count}</p>`)
+          )
+          .addTo(map.current);
+      });
+    });
+  }, [locationDistribution]);
+
+  return <div ref={mapContainer} style={{ width: '100%', height: '400px' }} />;
 };
 
 export default SimpleMap;

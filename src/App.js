@@ -34,8 +34,21 @@ const App = () => {
     <Router>
       <div className="flex h-screen">
         {/* Sidebar navigation */}
-        <div className="w-64 bg-gray-800 text-white">
-          {/* ... (navigation links) ... */}
+        <div className="w-64 bg-red-600 text-white">
+          <div className="p-4">
+            <h1 className="text-2xl font-bold mb-4">Romanian Red Cross</h1>
+            <h2 className="text-lg mb-6">Unified Beneficiary System</h2>
+            <nav>
+              <ul>
+                <li className="mb-2"><Link to="/" className="block py-2 px-4 hover:bg-red-700">Overview</Link></li>
+                <li className="mb-2"><Link to="/beneficiaries" className="block py-2 px-4 hover:bg-red-700">Beneficiaries</Link></li>
+                <li className="mb-2"><Link to="/activities" className="block py-2 px-4 hover:bg-red-700">Activities</Link></li>
+                <li className="mb-2"><Link to="/reports" className="block py-2 px-4 hover:bg-red-700">Reports</Link></li>
+                <li className="mb-2"><Link to="/projects" className="block py-2 px-4 hover:bg-red-700">Project Management</Link></li>
+                <li className="mb-2"><Link to="/data-integration" className="block py-2 px-4 hover:bg-red-700">Data Integration</Link></li>
+              </ul>
+            </nav>
+          </div>
         </div>
         <div className="flex-1 overflow-y-auto">
           <Routes>
