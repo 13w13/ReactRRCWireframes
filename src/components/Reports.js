@@ -5,6 +5,22 @@ import L from 'leaflet';
 import * as XLSX from 'xlsx';
 import 'leaflet/dist/leaflet.css';
 
+// You'll need to import a marker icon image
+
+import markerIcon from '../assets/marker-icon.png';
+
+const customMarkerIcon = new L.Icon({
+
+  iconUrl: markerIcon,
+
+  iconSize: [25, 41],
+
+  iconAnchor: [12, 41],
+
+  popupAnchor: [1, -34],
+
+});
+
 const Reports = ({ projects, activities, beneficiaries, locations }) => {
   const [selectedProject, setSelectedProject] = useState('');
   const [startDate, setStartDate] = useState('2023-01-01');
