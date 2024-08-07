@@ -1,49 +1,30 @@
 import React, { useState } from 'react';
 import DataUpload from './DataUpload';
 
-const Modal = ({ isOpen, onClose, children }) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
-      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-        <div className="mt-3 text-center">
-          {children}
-          <div className="items-center px-4 py-3">
-            <button
-              id="ok-btn"
-              className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-              onClick={onClose}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+const beneficiaryTemplateFields = [
+  'id', 'name', 'dateOfBirth', 'gender', 'nationality', 'beneficiaryType',
+  'temporaryProtectionNumber', 'familyMembers', 'registrationDate', 'branch',
+  'educationLevel', 'occupation', 'vulnerability', 'householdSize', 'incomeLevel',
+  'lastActivityType', 'lastActivityDate', 'lastActivityLocation'
+];
 
 const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
   const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [uploadLogs, setUploadLogs] = useState([]);
-  const [filter, setFilter] = useState({ beneficiaryType: '', nationality: '' });
 
   const handleRowClick = (beneficiary) => {
     setSelectedBeneficiary(beneficiary);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedBeneficiary(null);
   };
 
   const handleDataUploaded = (uploadedData) => {
-    const newBeneficiaries = uploadedData.map((beneficiary, index) => ({
-      id: `B${String(beneficiaries.length + index + 1).padStart(5, '0')}`,
-      ...beneficiary
+    const newBeneficiaries = uploadedData.map(beneficiary => ({
+      ...beneficiary,
+      familyMembers: beneficiary.familyMembers ? JSON.parse(beneficiary.familyMembers) : [],
+      lastActivity: {
+        type: beneficiary.lastActivityType,
+        date: beneficiary.lastActivityDate,
+        location: beneficiary.lastActivityLocation
+      }
     }));
     setBeneficiaries(prev => [...prev, ...newBeneficiaries]);
     setUploadLogs(prev => [...prev, {
@@ -53,53 +34,15 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
     }]);
   };
 
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilter(prev => ({ ...prev, [name]: value }));
-  };
-
-  const filteredBeneficiaries = beneficiaries.filter(beneficiary => 
-    (!filter.beneficiaryType || beneficiary.beneficiaryType === filter.beneficiaryType) &&
-    (!filter.nationality || beneficiary.nationality === filter.nationality)
-  );
-
   return (
     <div className="p-4 bg-gray-100">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Beneficiary Information</h1>
 
       <DataUpload 
         onDataUploaded={handleDataUploaded}
-        templateFields={['name', 'dateOfBirth', 'gender', 'nationality', 'beneficiaryType', 'registrationDate', 'location']}
+        templateFields={beneficiaryTemplateFields}
         dataType="Beneficiaries"
       />
-
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Filter Beneficiaries</h2>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <select
-            name="beneficiaryType"
-            value={filter.beneficiaryType}
-            onChange={handleFilterChange}
-            className="p-2 border rounded"
-          >
-            <option value="">All Beneficiary Types</option>
-            {[...new Set(beneficiaries.map(b => b.beneficiaryType))].map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-          <select
-            name="nationality"
-            value={filter.nationality}
-            onChange={handleFilterChange}
-            className="p-2 border rounded"
-          >
-            <option value="">All Nationalities</option>
-            {[...new Set(beneficiaries.map(b => b.nationality))].map(nationality => (
-              <option key={nationality} value={nationality}>{nationality}</option>
-            ))}
-          </select>
-        </div>
-      </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiaries List</h2>
@@ -111,11 +54,11 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
               <th className="py-2 px-4 border-b">Nationality</th>
               <th className="py-2 px-4 border-b">Beneficiary Type</th>
               <th className="py-2 px-4 border-b">Registration Date</th>
-              <th className="py-2 px-4 border-b">Location</th>
+              <th className="py-2 px-4 border-b">Branch</th>
             </tr>
           </thead>
           <tbody>
-            {filteredBeneficiaries.map((beneficiary) => (
+            {beneficiaries.map((beneficiary) => (
               <tr
                 key={beneficiary.id}
                 className="cursor-pointer hover:bg-gray-100"
@@ -126,32 +69,50 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
                 <td className="py-2 px-4 border-b">{beneficiary.nationality}</td>
                 <td className="py-2 px-4 border-b">{beneficiary.beneficiaryType}</td>
                 <td className="py-2 px-4 border-b">{beneficiary.registrationDate}</td>
-                <td className="py-2 px-4 border-b">{beneficiary.location}</td>
+                <td className="py-2 px-4 border-b">{beneficiary.branch}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        {selectedBeneficiary && (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Details</h2>
-            <div className="text-left">
+      {selectedBeneficiary && (
+        <div className="mt-6 bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Details</h2>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div>
               <p><strong>ID:</strong> {selectedBeneficiary.id}</p>
               <p><strong>Name:</strong> {selectedBeneficiary.name}</p>
               <p><strong>Date of Birth:</strong> {selectedBeneficiary.dateOfBirth}</p>
               <p><strong>Gender:</strong> {selectedBeneficiary.gender}</p>
               <p><strong>Nationality:</strong> {selectedBeneficiary.nationality}</p>
               <p><strong>Beneficiary Type:</strong> {selectedBeneficiary.beneficiaryType}</p>
+              <p><strong>Temporary Protection Number:</strong> {selectedBeneficiary.temporaryProtectionNumber || 'N/A'}</p>
               <p><strong>Registration Date:</strong> {selectedBeneficiary.registrationDate}</p>
-              <p><strong>Location:</strong> {selectedBeneficiary.location}</p>
+              <p><strong>Branch:</strong> {selectedBeneficiary.branch}</p>
+            </div>
+            <div>
+              <p><strong>Education Level:</strong> {selectedBeneficiary.educationLevel}</p>
+              <p><strong>Occupation:</strong> {selectedBeneficiary.occupation}</p>
+              <p><strong>Vulnerability:</strong> {selectedBeneficiary.vulnerability}</p>
+              <p><strong>Household Size:</strong> {selectedBeneficiary.householdSize}</p>
+              <p><strong>Income Level:</strong> {selectedBeneficiary.incomeLevel}</p>
             </div>
           </div>
-        )}
-      </Modal>
+          <h3 className="text-xl font-semibold mt-4 mb-2">Family Members</h3>
+          <ul className="list-disc pl-5 mb-4">
+            {selectedBeneficiary.familyMembers.map((member, index) => (
+              <li key={index}>{member.name} - {member.relation}</li>
+            ))}
+          </ul>
+          <h3 className="text-xl font-semibold mt-4 mb-2">Last Activity</h3>
+          <p><strong>Type:</strong> {selectedBeneficiary.lastActivity.type}</p>
+          <p><strong>Date:</strong> {selectedBeneficiary.lastActivity.date}</p>
+          <p><strong>Location:</strong> {selectedBeneficiary.lastActivity.location}</p>
+        </div>
+      )}
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="mt-6 bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Upload Logs</h2>
         <table className="w-full">
           <thead>

@@ -1,84 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
+import { ResponsiveLine } from '@nivo/line';
+import { ResponsiveBar } from '@nivo/bar';
+import { ResponsivePie } from '@nivo/pie';
 import * as XLSX from 'xlsx';
-import 'leaflet/dist/leaflet.css';
 
-// You'll need to import a marker icon image
-
-import markerIcon from '../assets/marker-icon.png';
-
-const customMarkerIcon = new L.Icon({
-
-  iconUrl: markerIcon,
-
-  iconSize: [25, 41],
-
-  iconAnchor: [12, 41],
-
-  popupAnchor: [1, -34],
-
-});
-
-const Reports = ({ projects, activities, beneficiaries, locations }) => {
+const Reports = ({ projects, activities, beneficiaries }) => {
   const [selectedProject, setSelectedProject] = useState('');
   const [startDate, setStartDate] = useState('2023-01-01');
   const [endDate, setEndDate] = useState('2023-12-31');
   const [reportData, setReportData] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    console.log('Projects:', projects);
-    console.log('Activities:', activities);
-    console.log('Beneficiaries:', beneficiaries);
-    console.log('Locations:', locations);
-  }, [projects, activities, beneficiaries, locations]);
 
   useEffect(() => {
     if (selectedProject) {
-      try {
-        generateReportData();
-      } catch (err) {
-        console.error('Error generating report data:', err);
-        setError('An error occurred while generating the report. Please try again.');
-      }
+      generateReportData();
     }
   }, [selectedProject, startDate, endDate]);
 
   const generateReportData = () => {
-    if (!selectedProject || !projects[selectedProject]) {
-      setError('No project selected or project data not available.');
-      return;
-    }
+    if (!selectedProject || !projects[selectedProject]) return;
 
     const projectData = projects[selectedProject];
     
     // Generate beneficiary reach and services data
-    const reachAndServicesData = projectData.reduce((acc, indicator) => {
-      const indicatorActivities = activities.filter(activity => 
-        indicator.linkedActivities.includes(activity.activityType) &&
-        new Date(activity.date) >= new Date(startDate) &&
-        new Date(activity.date) <= new Date(endDate)
-      );
-
-      indicatorActivities.forEach(activity => {
-        const month = activity.date.slice(0, 7); // YYYY-MM
-        if (!acc[month]) {
-          acc[month] = { month, beneficiaries: new Set(), services: 0 };
-        }
-        acc[month].beneficiaries.add(activity.beneficiaryId);
-        acc[month].services++;
-      });
-
-      return acc;
-    }, {});
-
-    const reachAndServicesChartData = Object.values(reachAndServicesData).map(data => ({
-      month: data.month,
-      beneficiaries: data.beneficiaries.size,
-      services: data.services
-    })).sort((a, b) => a.month.localeCompare(b.month));
+    const reachAndServicesData = projectData[0].monthlyProgress.map(progress => ({
+      month: progress.month,
+      beneficiaries: progress.uniqueBeneficiaries,
+      services: progress.count
+    }));
 
     // Generate indicator progress data
     const indicatorProgress = projectData.map(indicator => {
@@ -122,7 +70,7 @@ const Reports = ({ projects, activities, beneficiaries, locations }) => {
       .filter(activity => 
         activity.date >= startDate && 
         activity.date <= endDate &&
-        projectData.some(indicator => indicator.linkedActivities.includes(activity.activityType))
+        projectData[0].linkedActivities.includes(activity.activityType)
       )
       .reduce((acc, activity) => {
         const beneficiary = beneficiaries.find(b => b.id === activity.beneficiaryId);
@@ -132,31 +80,10 @@ const Reports = ({ projects, activities, beneficiaries, locations }) => {
         return acc;
       }, {});
 
-    // Generate activity distribution by location
-    const activityDistribution = activities
-      .filter(activity => 
-        activity.date >= startDate && 
-        activity.date <= endDate &&
-        projectData.some(indicator => indicator.linkedActivities.includes(activity.activityType))
-      )
-      .reduce((acc, activity) => {
-        if (!acc[activity.location]) {
-          const locationData = locations.find(l => l.name === activity.location);
-          acc[activity.location] = {
-            count: 0,
-            latitude: locationData ? locationData.latitude : null,
-            longitude: locationData ? locationData.longitude : null
-          };
-        }
-        acc[activity.location].count += 1;
-        return acc;
-      }, {});
-
     setReportData({
-      reachAndServicesData: reachAndServicesChartData,
+      reachAndServicesData,
       indicatorProgress,
-      beneficiaryTypeDistribution: Object.entries(beneficiaryTypeDistribution).map(([id, value]) => ({ id, value })),
-      activityDistribution
+      beneficiaryTypeDistribution: Object.entries(beneficiaryTypeDistribution).map(([type, value]) => ({ id: type, value }))
     });
   };
 
@@ -204,17 +131,6 @@ const Reports = ({ projects, activities, beneficiaries, locations }) => {
     const wsBeneficiaryTypes = XLSX.utils.json_to_sheet(reportData.beneficiaryTypeDistribution);
     XLSX.utils.book_append_sheet(workbook, wsBeneficiaryTypes, "Beneficiary Types");
 
-    // Add activity distribution by location
-    const wsActivityDistribution = XLSX.utils.json_to_sheet(
-      Object.entries(reportData.activityDistribution).map(([location, data]) => ({
-        Location: location,
-        Count: data.count,
-        Latitude: data.latitude,
-        Longitude: data.longitude
-      }))
-    );
-    XLSX.utils.book_append_sheet(workbook, wsActivityDistribution, "Activity Distribution");
-
     XLSX.writeFile(workbook, `${selectedProject}_Report.xlsx`);
   };
 
@@ -259,106 +175,331 @@ const Reports = ({ projects, activities, beneficiaries, locations }) => {
         <>
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Reach and Services</h2>
-            <div style={{ height: '400px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={reportData.reachAndServicesData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis yAxisId="left" />
-                  <YAxis yAxisId="right" orientation="right" />
-                  <Tooltip />
-                  <Legend />
-                  <Line yAxisId="left" type="monotone" dataKey="beneficiaries" stroke="#8884d8" name="Beneficiaries" />
-                  <Line yAxisId="right" type="monotone" dataKey="services" stroke="#82ca9d" name="Services" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <ResponsiveLine
+              data={[
+                {
+                  id: "Beneficiaries",
+                  data: reportData.reachAndServicesData.map(d => ({ x: d.month, y: d.beneficiaries }))
+                },
+                {
+                  id: "Services",
+                  data: reportData.reachAndServicesData.map(d => ({ x: d.month, y: d.services }))
+                }
+              ]}
+              margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
+              xScale={{ type: 'point' }}
+              yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false, reverse: false }}
+              yFormat=" >-.2f"
+              axisTop={null}
+              axisRight={null}
+              axisBottom={{
+                orient: 'bottom',
+                tickSize: 5,
+                tickPadding: 5,
+                tickRotation: 0,
+                legend: 'Month',
+                legendOffset: 36,
+                legendPosition: 'middle'
+              }}
+              axisLeft={{
+                orient: 'left',
+                tickSize: 5,
+                tickPadding: 5,
+                tickRotation: 0,
+                legend: 'Count',
+                legendOffset: -40,
+                legendPosition: 'middle'
+              }}
+              pointSize={10}
+              pointColor={{ theme: 'background' }}
+              pointBorderWidth={2}
+              pointBorderColor={{ from: 'serieColor' }}
+              pointLabelYOffset={-12}
+              useMesh={true}
+              legends={[
+                {
+                  anchor: 'bottom-right',
+                  direction: 'column',
+                  justify: false,
+                  translateX: 100,
+                  translateY: 0,
+                  itemsSpacing: 0,
+                  itemDirection: 'left-to-right',
+                  itemWidth: 80,
+                  itemHeight: 20,
+                  itemOpacity: 0.75,
+                  symbolSize: 12,
+                  symbolShape: 'circle',
+                  symbolBorderColor: 'rgba(0, 0, 0, .5)',
+                  effects: [
+                    {
+                      on: 'hover',
+                      style: {
+                        itemBackground: 'rgba(0, 0, 0, .03)',
+                        itemOpacity: 1
+                      }
+                    }
+                  ]
+                }
+              ]}
+            />
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Indicator Progress</h2>
-            <div style={{ height: '400px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={reportData.indicatorProgress}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="indicator" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="achieved" fill="#8884d8" name="Achieved" />
-                  <Bar dataKey="target" fill="#82ca9d" name="Target" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <ResponsiveBar
+              data={reportData.indicatorProgress}
+              keys={['achieved', 'target']}
+              indexBy="indicator"
+              margin={{ top: 50, right: 130, bottom: 50, left: 60 }}
+              padding={0.3}
+              valueScale={{ type: 'linear' }}
+              indexScale={{ type: 'band', round: true }}
+              colors={{ scheme: 'nivo' }}
+              defs={[
+                {
+                  id: 'dots',
+                  type: 'patternDots',
+                  background: 'inherit',
+                  color: '#38bcb2',
+                  size: 4,
+                  padding: 1,
+                  stagger: true
+                },
+                {
+                  id: 'lines',
+                  type: 'patternLines',
+                  background: 'inherit',
+                  color: '#eed312',
+                  rotation: -45,
+                  lineWidth: 6,
+                  spacing: 10
+                }
+              ]}
+              fill={[
+                {
+                  match: {
+                    id: 'achieved'
+                  },
+                  id: 'dots'
+                },
+                {
+                  match: {
+                    id: 'target'
+                  },
+                  id: 'lines'
+                }
+              ]}
+              axisTop={null}
+              axisRight={null}
+              axisBottom={{
+                tickSize: 5,
+                tickPadding: 5,
+                tickRotation: 0,
+                legend: 'Indicator',
+                legendPosition: 'middle',
+                legendOffset: 32
+              }}
+              axisLeft={{
+                tickSize: 5,
+                tickPadding: 5,
+                tickRotation: 0,
+                legend: 'Value',
+                legendPosition: 'middle',
+                legendOffset: -40
+              }}
+              labelSkipWidth={12}
+              labelSkipHeight={12}
+              labelTextColor={{ from: 'color', modifiers: [ [ 'darker', 1.6 ] ] }}
+              legends={[
+                {
+                  dataFrom: 'keys',
+                  anchor: 'bottom-right',
+                  direction: 'column',
+                  justify: false,
+                  translateX: 120,
+                  translateY: 0,
+                  itemsSpacing: 2,
+                  itemWidth: 100,
+                  itemHeight: 20,
+                  itemDirection: 'left-to-right',
+                  itemOpacity: 0.85,
+                  symbolSize: 20,
+                  effects: [
+                    {
+                      on: 'hover',
+                      style: {
+                        itemOpacity: 1
+                      }
+                    }
+                  ]
+                }
+              ]}
+            />
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6 mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Type Distribution</h2>
-            <div style={{ height: '400px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={reportData.beneficiaryTypeDistribution}
-                    dataKey="value"
-                    nameKey="id"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    fill="#8884d8"
-                    label
-                  />
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Activity Distribution Map</h2>
-            <div style={{ height: '400px' }}>
-              <MapContainer center={[45.9432, 24.9668]} zoom={7} style={{ height: '100%', width: '100%' }}>
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                {Object.entries(reportData.activityDistribution).map(([locationName, data]) => (
-                  <Marker 
-                    key={locationName} 
-                    position={[data.latitude, data.longitude]}
-                    icon={customMarkerIcon}
-                  >
-                    <Popup>
-                      <strong>{locationName}</strong><br />
-                      Activities: {data.count}
-                    </Popup>
-                  </Marker>
-                ))}
-              </MapContainer>
-            </div>
+            <ResponsivePie
+              data={reportData.beneficiaryTypeDistribution}
+              margin={{ top: 40, right: 80, bottom: 80, left: 80 }}
+              innerRadius={0.5}
+              padAngle={0.7}
+              cornerRadius={3}
+              activeOuterRadiusOffset={8}
+              borderWidth={1}
+              borderColor={{ from: 'color', modifiers: [ [ 'darker', 0.2 ] ] }}
+              arcLinkLabelsSkipAngle={10}
+              arcLinkLabelsTextColor="#333333"
+              arcLinkLabelsThickness={2}
+              arcLinkLabelsColor={{ from: 'color' }}
+              arcLabelsSkipAngle={10}
+              arcLabelsTextColor={{ from: 'color', modifiers: [ [ 'darker', 2 ] ] }}
+              defs={[
+                {
+                  id: 'dots',
+                  type: 'patternDots',
+                  background: 'inherit',
+                  color: 'rgba(255, 255, 255, 0.3)',
+                  size: 4,
+                  padding: 1,
+                  stagger: true
+                },
+                {
+                  id: 'lines',
+                  type: 'patternLines',
+                  background: 'inherit',
+                  color: 'rgba(255, 255, 255, 0.3)',
+                  rotation: -45,
+                  lineWidth: 6,
+                  spacing: 10
+                }
+              ]}
+              fill={[
+                {
+                  match: {
+                    id: 'ruby'
+                  },
+                  id: 'dots'
+                },
+                {
+                  match: {
+                    id: 'c'
+                  },
+                  id: 'dots'
+                },
+                {
+                  match: {
+                    id: 'go'
+                  },
+                  id: 'dots'
+                },
+                {
+                  match: {
+                    id: 'python'
+                  },
+                  id: 'dots'
+                },
+                {
+                  match: {
+                    id: 'scala'
+                  },
+                  id: 'lines'
+                },
+                {
+                  match: {
+                    id: 'lisp'
+                  },
+                  id: 'lines'
+                },
+                {
+                  match: {
+                    id: 'elixir'
+                  },
+                  id: 'lines'
+                },
+                {
+                  match: {
+                    id: 'javascript'
+                  },
+                  id: 'lines'
+                }
+              ]}
+              legends={[
+                {
+                  anchor: 'bottom',
+                  direction: 'row',
+                  justify: false,
+                  translateX: 0,
+                  translateY: 56,
+                  itemsSpacing: 0,
+                  itemWidth: 100,
+                  itemHeight: 18,
+                  itemTextColor: '#999',
+                  itemDirection: 'left-to-right',
+                  itemOpacity: 1,
+                  symbolSize: 18,
+                  symbolShape: 'circle',
+                  effects: [
+                    {
+                      on: 'hover',
+                      style: {
+                        itemTextColor: '#000'
+                      }
+                    }
+                  ]
+                }
+              ]}
+            />
           </div>
 
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Indicator Tracking Table</h2>
-            <table className="min-w-full bg-white">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="py-2 px-4 border-b">Indicator</th>
-                  <th className="py-2 px-4 border-b">Target</th>
-                  <th className="py-2 px-4 border-b">Achieved</th>
-                  <th className="py-2 px-4 border-b">Progress</th>
-                  <th className="py-2 px-4 border-b">Unique People Reached</th>
-                  <th className="py-2 px-4 border-b">Services Provided</th>
-                </tr>
-              </thead>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Project Summary</h2>
+            <table className="w-full">
               <tbody>
                 {reportData.indicatorProgress.map((indicator, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="py-2 px-4">{indicator.indicator}</td>
-                    <td className="py-2 px-4">{indicator.target}</td>
-                    <td className="py-2 px-4">{indicator.achieved}</td>
-                    <td className="py-2 px-4">
-                      {((indicator.achieved / indicator.target) * 100).toFixed(2)}%
-                    </td>
-                    <td className="py-2 px-4">{indicator.uniquePeopleReached}</td>
-                    <td className="py-2 px-4">{indicator.serviceCount}</td>
-                  </tr>
+                  <React.Fragment key={index}>
+                    <tr className="border-b">
+                      <td className="py-2 font-semibold" colSpan="2">{indicator.indicator}</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2">Target:</td>
+                      <td className="py-2 text-right">{indicator.target}</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2">Achieved:</td>
+                      <td className="py-2 text-right">{indicator.achieved}</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2">Unique People Reached:</td>
+                      <td className="py-2 text-right">{indicator.uniquePeopleReached}</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2">Service Count:</td>
+                      <td className="py-2 text-right">{indicator.serviceCount}</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2">Male / Female:</td>
+                      <td className="py-2 text-right">{indicator.disaggregatedData.bySex.male} / {indicator.disaggregatedData.bySex.female}</td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2">Children / Adults / Elderly:</td>
+                      <td className="py-2 text-right">
+                        {indicator.disaggregatedData.byAge.children} / {indicator.disaggregatedData.byAge.adults} / {indicator.disaggregatedData.byAge.elderly}
+                      </td>
+                    </tr>
+                    <tr className="border-b">
+                      <td className="py-2">Nationalities:</td>
+                      <td className="py-2 text-right">
+                        {Object.entries(indicator.disaggregatedData.byNationality).map(([nationality, count], i) => (
+                          <span key={i}>
+                            {nationality}: {count}
+                            {i < Object.entries(indicator.disaggregatedData.byNationality).length - 1 ? ', ' : ''}
+                          </span>
+                        ))}
+                      </td>
+                    </tr>
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>

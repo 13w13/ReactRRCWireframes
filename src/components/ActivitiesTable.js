@@ -1,26 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import DataUpload from './DataUpload';
 
-const ActivitiesTable = ({ activities, setActivities, beneficiaries, locations, activityTypes }) => {
+const ActivitiesTable = ({ activities, setActivities }) => {  
   const [newActivity, setNewActivity] = useState({
     beneficiaryId: '',
+    name: '',
     activityType: '',
     date: '',
-    location: ''
+    location: '',
+    source: ''
   });
   const [uploadLogs, setUploadLogs] = useState([]);
-  const [filter, setFilter] = useState({ activityType: '', location: '' });
-
-  useEffect(() => {
-    console.log('Activities:', activities);
-    console.log('Beneficiaries:', beneficiaries);
-    console.log('Locations:', locations);
-    console.log('Activity Types:', activityTypes);
-  }, [activities, beneficiaries, locations, activityTypes]);
-
-  if (!activities || !beneficiaries || !locations || !activityTypes) {
-    return <div>Loading activities data...</div>;
-  }
+  const [filter, setFilter] = useState({ activityType: '', location: '', source: '' });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -33,21 +24,15 @@ const ActivitiesTable = ({ activities, setActivities, beneficiaries, locations, 
   };
 
   const handleAddActivity = () => {
-    if (newActivity.beneficiaryId && newActivity.activityType && newActivity.date && newActivity.location) {
-      const beneficiary = beneficiaries.find(b => b.id === newActivity.beneficiaryId);
-      const location = locations.find(l => l.name === newActivity.location);
-      setActivities(prev => [...prev, {
-        id: `A${String(prev.length + 1).padStart(5, '0')}`,
-        ...newActivity,
-        beneficiaryName: beneficiary ? beneficiary.name : 'Unknown',
-        latitude: location ? location.latitude : null,
-        longitude: location ? location.longitude : null
-      }]);
+    if (newActivity.beneficiaryId && newActivity.activityType && newActivity.date) {
+      setActivities(prev => [...prev, { id: Date.now(), ...newActivity }]);
       setNewActivity({
         beneficiaryId: '',
+        name: '',
         activityType: '',
         date: '',
-        location: ''
+        location: '',
+        source: ''
       });
     } else {
       alert('Please fill in all required fields');
@@ -56,11 +41,8 @@ const ActivitiesTable = ({ activities, setActivities, beneficiaries, locations, 
 
   const handleDataUploaded = (uploadedData) => {
     const newActivities = uploadedData.map((activity, index) => ({
-      id: `A${String(activities.length + index + 1).padStart(5, '0')}`,
-      ...activity,
-      beneficiaryName: beneficiaries.find(b => b.id === activity.beneficiaryId)?.name || 'Unknown',
-      latitude: locations.find(l => l.name === activity.location)?.latitude || null,
-      longitude: locations.find(l => l.name === activity.location)?.longitude || null
+      id: Date.now() + index,
+      ...activity
     }));
     setActivities(prev => [...prev, ...newActivities]);
     setUploadLogs(prev => [...prev, {
@@ -72,7 +54,8 @@ const ActivitiesTable = ({ activities, setActivities, beneficiaries, locations, 
 
   const filteredActivities = activities.filter(activity => 
     (!filter.activityType || activity.activityType === filter.activityType) &&
-    (!filter.location || activity.location === filter.location)
+    (!filter.location || activity.location === filter.location) &&
+    (!filter.source || activity.source === filter.source)
   );
 
   return (
@@ -81,35 +64,37 @@ const ActivitiesTable = ({ activities, setActivities, beneficiaries, locations, 
       
       <DataUpload 
         onDataUploaded={handleDataUploaded}
-        templateFields={['beneficiaryId', 'activityType', 'date', 'location']}
+        templateFields={['beneficiaryId', 'name', 'activityType', 'date', 'location', 'source']}
         dataType="Activities"
       />
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Add New Activity</h2>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <select
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <input
+            type="text"
             name="beneficiaryId"
+            placeholder="Beneficiary ID*"
             value={newActivity.beneficiaryId}
             onChange={handleInputChange}
             className="p-2 border rounded"
-          >
-            <option value="">Select Beneficiary</option>
-            {beneficiaries.map(b => (
-              <option key={b.id} value={b.id}>{b.name} ({b.id})</option>
-            ))}
-          </select>
-          <select
+          />
+          <input
+            type="text"
+            name="name"
+            placeholder="Beneficiary Name"
+            value={newActivity.name}
+            onChange={handleInputChange}
+            className="p-2 border rounded"
+          />
+          <input
+            type="text"
             name="activityType"
+            placeholder="Activity Type*"
             value={newActivity.activityType}
             onChange={handleInputChange}
             className="p-2 border rounded"
-          >
-            <option value="">Select Activity Type</option>
-            {activityTypes.map(type => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
+          />
           <input
             type="date"
             name="date"
@@ -117,24 +102,29 @@ const ActivitiesTable = ({ activities, setActivities, beneficiaries, locations, 
             onChange={handleInputChange}
             className="p-2 border rounded"
           />
-          <select
+          <input
+            type="text"
             name="location"
+            placeholder="Location"
             value={newActivity.location}
             onChange={handleInputChange}
             className="p-2 border rounded"
-          >
-            <option value="">Select Location</option>
-            {locations.map(l => (
-              <option key={l.id} value={l.name}>{l.name}</option>
-            ))}
-          </select>
+          />
+          <input
+            type="text"
+            name="source"
+            placeholder="Source System"
+            value={newActivity.source}
+            onChange={handleInputChange}
+            className="p-2 border rounded"
+          />
         </div>
         <button onClick={handleAddActivity} className="bg-blue-500 text-white px-4 py-2 rounded">Add Activity</button>
       </div>
 
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Filter Activities</h2>
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-3 gap-4 mb-4">
           <select
             name="activityType"
             value={filter.activityType}
@@ -142,7 +132,7 @@ const ActivitiesTable = ({ activities, setActivities, beneficiaries, locations, 
             className="p-2 border rounded"
           >
             <option value="">All Activity Types</option>
-            {activityTypes.map(type => (
+            {[...new Set(activities.map(a => a.activityType))].map(type => (
               <option key={type} value={type}>{type}</option>
             ))}
           </select>
@@ -153,8 +143,19 @@ const ActivitiesTable = ({ activities, setActivities, beneficiaries, locations, 
             className="p-2 border rounded"
           >
             <option value="">All Locations</option>
-            {locations.map(l => (
-              <option key={l.id} value={l.name}>{l.name}</option>
+            {[...new Set(activities.map(a => a.location))].map(location => (
+              <option key={location} value={location}>{location}</option>
+            ))}
+          </select>
+          <select
+            name="source"
+            value={filter.source}
+            onChange={handleFilterChange}
+            className="p-2 border rounded"
+          >
+            <option value="">All Sources</option>
+            {[...new Set(activities.map(a => a.source))].map(source => (
+              <option key={source} value={source}>{source}</option>
             ))}
           </select>
         </div>
@@ -165,21 +166,23 @@ const ActivitiesTable = ({ activities, setActivities, beneficiaries, locations, 
         <table className="w-full">
           <thead>
             <tr className="bg-gray-200">
-              <th className="p-2 text-left">ID</th>
-              <th className="p-2 text-left">Beneficiary</th>
+              <th className="p-2 text-left">Beneficiary ID</th>
+              <th className="p-2 text-left">Name</th>
               <th className="p-2 text-left">Activity Type</th>
               <th className="p-2 text-left">Date</th>
               <th className="p-2 text-left">Location</th>
+              <th className="p-2 text-left">Source System</th>
             </tr>
           </thead>
           <tbody>
             {filteredActivities.map(activity => (
               <tr key={activity.id} className="border-b">
-                <td className="p-2">{activity.id}</td>
-                <td className="p-2">{activity.beneficiaryName} ({activity.beneficiaryId})</td>
+                <td className="p-2">{activity.beneficiaryId}</td>
+                <td className="p-2">{activity.name}</td>
                 <td className="p-2">{activity.activityType}</td>
                 <td className="p-2">{activity.date}</td>
                 <td className="p-2">{activity.location}</td>
+                <td className="p-2">{activity.source}</td>
               </tr>
             ))}
           </tbody>
@@ -197,7 +200,7 @@ const ActivitiesTable = ({ activities, setActivities, beneficiaries, locations, 
             </tr>
           </thead>
           <tbody>
-            {uploadLogs.map((log, index) => (
+          {uploadLogs.map((log, index) => (
               <tr key={index} className="border-b">
                 <td className="p-2">{log.timestamp}</td>
                 <td className="p-2">{log.count}</td>
