@@ -5,49 +5,36 @@ import L from 'leaflet';
 import * as XLSX from 'xlsx';
 import 'leaflet/dist/leaflet.css';
 
-// You'll need to import a marker icon image
-import markerIcon from '../assets/marker-icon.png';
-
-const customMarkerIcon = new L.Icon({
-  iconUrl: markerIcon,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-});
-
 const Reports = ({ projects, activities, beneficiaries, locations }) => {
   const [selectedProject, setSelectedProject] = useState('');
   const [startDate, setStartDate] = useState('2023-01-01');
   const [endDate, setEndDate] = useState('2023-12-31');
   const [reportData, setReportData] = useState(null);
+  const [error, setError] = useState(null);
 
-  const Reports = ({ projects, activities, beneficiaries, locations }) => {
-    const [selectedProject, setSelectedProject] = useState('');
-    const [startDate, setStartDate] = useState('2023-01-01');
-    const [endDate, setEndDate] = useState('2023-12-31');
-    const [reportData, setReportData] = useState(null);
-    const [error, setError] = useState(null);
-  
-    useEffect(() => {
-      console.log('Projects:', projects);
-      console.log('Activities:', activities);
-      console.log('Beneficiaries:', beneficiaries);
-      console.log('Locations:', locations);
-    }, [projects, activities, beneficiaries, locations]);
-  
-    useEffect(() => {
-      if (selectedProject) {
-        try {
-          generateReportData();
-        } catch (err) {
-          console.error('Error generating report data:', err);
-          setError('An error occurred while generating the report. Please try again.');
-        }
+  useEffect(() => {
+    console.log('Projects:', projects);
+    console.log('Activities:', activities);
+    console.log('Beneficiaries:', beneficiaries);
+    console.log('Locations:', locations);
+  }, [projects, activities, beneficiaries, locations]);
+
+  useEffect(() => {
+    if (selectedProject) {
+      try {
+        generateReportData();
+      } catch (err) {
+        console.error('Error generating report data:', err);
+        setError('An error occurred while generating the report. Please try again.');
       }
-    }, [selectedProject, startDate, endDate]);
+    }
+  }, [selectedProject, startDate, endDate]);
 
   const generateReportData = () => {
-    if (!selectedProject || !projects[selectedProject]) return;
+    if (!selectedProject || !projects[selectedProject]) {
+      setError('No project selected or project data not available.');
+      return;
+    }
 
     const projectData = projects[selectedProject];
     
