@@ -1,26 +1,6 @@
 import React, { useState } from 'react';
 
-const activityTypes = [
-  'Health consultations', 'Food Distribution', 'Shelter Support', 'WASH Activities',
-  'Protection Services', 'Education Support', 'Livelihoods Assistance',
-  'Cash Assistance', 'Psychosocial Support'
-];
-
-const locations = [
-  'Bucharest Branch', 'Cluj-Napoca Branch', 'Iasi Branch', 'Timisoara Branch',
-  'Constanta Branch', 'Mobile Clinic', 'Refugee Camp A', 'Refugee Camp B'
-];
-
-const beneficiaryTypes = [
-  'Refugees', 'Internally Displaced Persons', 'Host Community Members',
-  'Children', 'Women', 'Elderly', 'Persons with Disabilities'
-];
-
-const nationalities = [
-  'Romanian', 'Ukrainian', 'Moldovan', 'Syrian', 'Afghan', 'Other'
-];
-
-const ProjectManagement = ({ projects, setProjects }) => {
+const ProjectManagement = ({ projects, setProjects, locations, activityTypes }) => {
   const [selectedProject, setSelectedProject] = useState('');
   const [editMode, setEditMode] = useState(false);
   const [newProject, setNewProject] = useState({ name: '', indicators: [] });
@@ -187,49 +167,15 @@ const ProjectManagement = ({ projects, setProjects }) => {
             <h4 className="font-semibold">Locations</h4>
             <div className="grid grid-cols-2 gap-2">
               {locations.map(location => (
-                <label key={location} className="flex items-center">
+                <label key={location.id} className="flex items-center">
                   <input
                     type="checkbox"
-                    value={location}
-                    checked={newIndicator.locations.includes(location)}
+                    value={location.name}
+                    checked={newIndicator.locations.includes(location.name)}
                     onChange={(e) => handleCheckboxChange(e, 'locations')}
                     className="mr-2"
                   />
-                  {location}
-                </label>
-              ))}
-            </div>
-          </div>
-          <div className="mb-2">
-            <h4 className="font-semibold">Beneficiary Types</h4>
-            <div className="grid grid-cols-2 gap-2">
-              {beneficiaryTypes.map(type => (
-                <label key={type} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value={type}
-                    checked={newIndicator.beneficiaryTypes.includes(type)}
-                    onChange={(e) => handleCheckboxChange(e, 'beneficiaryTypes')}
-                    className="mr-2"
-                  />
-                  {type}
-                </label>
-              ))}
-            </div>
-          </div>
-          <div className="mb-2">
-            <h4 className="font-semibold">Nationalities</h4>
-            <div className="grid grid-cols-2 gap-2">
-              {nationalities.map(nationality => (
-                <label key={nationality} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value={nationality}
-                    checked={newIndicator.nationalities.includes(nationality)}
-                    onChange={(e) => handleCheckboxChange(e, 'nationalities')}
-                    className="mr-2"
-                  />
-                  {nationality}
+                  {location.name}
                 </label>
               ))}
             </div>
@@ -274,8 +220,6 @@ const ProjectManagement = ({ projects, setProjects }) => {
                 <p><strong>Target:</strong> {indicator.target.value} {indicator.target.description}</p>
                 <p><strong>Linked Activities:</strong> {indicator.linkedActivities.join(', ')}</p>
                 <p><strong>Locations:</strong> {indicator.locations.join(', ')}</p>
-                <p><strong>Beneficiary Types:</strong> {indicator.beneficiaryTypes.join(', ')}</p>
-                <p><strong>Nationalities:</strong> {indicator.nationalities.join(', ')}</p>
                 <p><strong>Calculation Method:</strong> {indicator.calculationMethod}</p>
               </div>
             ))}
