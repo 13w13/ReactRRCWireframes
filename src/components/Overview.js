@@ -1,39 +1,125 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import Overview from './components/Overview';
-import BeneficiaryInfo from './components/BeneficiaryInfo';
-import ActivitiesTable from './components/ActivitiesTable';
-import ProjectManagement from './components/ProjectManagement';
-import Reports from './components/Reports';
-import DataIntegrationStatus from './components/DataIntegrationStatus';
+import React from 'react';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 
-// Import mock data
-import { beneficiaries as mockBeneficiaries, activities as mockActivities, projects as mockProjects } from './mockData';
+const Overview = ({ beneficiaries, activities, projects }) => {
+  // Calculate statistics
+  const totalBeneficiaries = beneficiaries.length;
+  const totalActivities = activities.length;
+  const totalProjects = Object.values(projects).flat().length;
 
-const App = () => {
-  const [beneficiaries, setBeneficiaries] = useState(mockBeneficiaries);
-  const [activities, setActivities] = useState(mockActivities);
-  const [projects, setProjects] = useState(mockProjects);
+  // Prepare data for the activities and beneficiaries chart
+  const chartData = activities.reduce((acc, activity) => {
+    const date = activity.date.slice(0, 7); // Get YYYY-MM
+    const existingEntry = acc.find(entry => entry.month === date);
+    if (existingEntry) {
+      existingEntry.activities++;
+      if (!existingEntry.beneficiaries.includes(activity.beneficiaryId)) {
+        existingEntry.beneficiaries.push(activity.beneficiaryId);
+      }
+    } else {
+      acc.push({ month: date, activities: 1, beneficiaries: [activity.beneficiaryId] });
+    }
+    return acc;
+  }, []).map(entry => ({
+    ...entry,
+    beneficiaries: entry.beneficiaries.length,
+  })).sort((a, b) => a.month.localeCompare(b.month));
+
+  // Prepare data for beneficiary type distribution
+  const beneficiaryTypeData = beneficiaries.reduce((acc, beneficiary) => {
+    acc[beneficiary.beneficiaryType] = (acc[beneficiary.beneficiaryType] || 0) + 1;
+    return acc;
+  }, {});
+
+  const beneficiaryTypePieData = Object.entries(beneficiaryTypeData).map(([name, value]) => ({ name, value }));
+
+  // Prepare data for project progress
+  const projectProgressData = Object.entries(projects).flatMap(([projectGroup, projectList]) =>
+    projectList.map(project => ({
+      name: project.name,
+      target: project.target.value,
+      achieved: project.monthlyProgress.reduce((sum, month) => sum + month.count, 0)
+    }))
+  );
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
   return (
-    <Router>
-      <div className="flex h-screen">
-        <div className="w-64 bg-gray-800 text-white">
-          {/* Sidebar content remains unchanged */}
+    <div className="p-4 bg-gray-100">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Unified Beneficiary System Dashboard</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <h2 className="text-xl font-semibold mb-2">Total Beneficiaries</h2>
+          <p className="text-3xl font-bold text-blue-600">{totalBeneficiaries}</p>
         </div>
-        <div className="flex-1 overflow-y-auto">
-          <Routes>
-            <Route path="/" element={<Overview beneficiaries={beneficiaries} activities={activities} projects={projects} />} />
-            <Route path="/beneficiaries" element={<BeneficiaryInfo beneficiaries={beneficiaries} setBeneficiaries={setBeneficiaries} />} />
-            <Route path="/activities" element={<ActivitiesTable activities={activities} setActivities={setActivities} />} />
-            <Route path="/reports" element={<Reports projects={projects} activities={activities} beneficiaries={beneficiaries} />} />
-            <Route path="/project-management" element={<ProjectManagement projects={projects} setProjects={setProjects} />} />
-            <Route path="/data-integration" element={<DataIntegrationStatus />} />
-          </Routes>
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <h2 className="text-xl font-semibold mb-2">Total Activities</h2>
+          <p className="text-3xl font-bold text-green-600">{totalActivities}</p>
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <h2 className="text-xl font-semibold mb-2">Active Projects</h2>
+          <p className="text-3xl font-bold text-purple-600">{totalProjects}</p>
         </div>
       </div>
-    </Router>
+      
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Activities and Beneficiaries Over Time</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis yAxisId="left" />
+            <YAxis yAxisId="right" orientation="right" />
+            <Tooltip />
+            <Legend />
+            <Line yAxisId="left" type="monotone" dataKey="activities" stroke="#8884d8" name="Activities" />
+            <Line yAxisId="right" type="monotone" dataKey="beneficiaries" stroke="#82ca9d" name="Unique Beneficiaries" />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Beneficiary Type Distribution</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={beneficiaryTypePieData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              >
+                {beneficiaryTypePieData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Project Progress</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={projectProgressData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="achieved" fill="#8884d8" name="Achieved" />
+              <Bar dataKey="target" fill="#82ca9d" name="Target" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default App;
+export default Overview;
