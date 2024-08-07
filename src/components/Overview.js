@@ -34,13 +34,12 @@ const Overview = ({ beneficiaries, activities, projects }) => {
   const beneficiaryTypePieData = Object.entries(beneficiaryTypeData).map(([name, value]) => ({ name, value }));
 
   // Prepare data for project progress
-  const projectProgressData = Object.entries(projects).flatMap(([projectGroup, projectList]) =>
-    projectList.map(project => ({
-      name: project.name,
-      target: project.target.value,
-      achieved: project.monthlyProgress.reduce((sum, month) => sum + month.count, 0)
-    }))
-  );
+  const projectProgressData = Object.entries(projects).map(([projectName, projectDetails]) => ({
+    name: projectName,
+    target: projectDetails.reduce((sum, project) => sum + project.target.value, 0),
+    achieved: projectDetails.reduce((sum, project) => 
+      sum + project.monthlyProgress.reduce((total, month) => total + month.count, 0), 0)
+  }));
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -64,7 +63,7 @@ const Overview = ({ beneficiaries, activities, projects }) => {
       </div>
       
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Activities and Beneficiaries Over Time</h2>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Cumulative Reach and Services</h2>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" />

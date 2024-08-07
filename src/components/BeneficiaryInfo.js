@@ -1,33 +1,15 @@
 import React, { useState } from 'react';
 import DataUpload from './DataUpload';
 
-
-
-const initialBeneficiaries = [
-  {
-    id: 'B12345',
-    name: 'John Doe',
-    dateOfBirth: '1980-01-01',
-    gender: 'Male',
-    nationality: 'Ukrainian',
-    beneficiaryType: 'Refugee',
-    familyMembers: [
-      { id: 'B12346', name: 'Jane Doe', relation: 'Spouse' },
-      { id: 'B12347', name: 'Alice Doe', relation: 'Child' },
-    ],
-    lastActivity: { type: 'Food Distribution', date: '2024-08-06', location: 'Bucharest' },
-  },
-  // ... other beneficiaries
-];
-
 const beneficiaryTemplateFields = [
   'id', 'name', 'dateOfBirth', 'gender', 'nationality', 'beneficiaryType',
-  'familyMember1Name', 'familyMember1Relation',
-  'familyMember2Name', 'familyMember2Relation',
+  'temporaryProtectionNumber', 'familyMembers', 'registrationDate', 'branch',
+  'educationLevel', 'occupation', 'vulnerability', 'householdSize', 'incomeLevel',
   'lastActivityType', 'lastActivityDate', 'lastActivityLocation'
 ];
 
-const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {  const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
+const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
+  const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
   const [uploadLogs, setUploadLogs] = useState([]);
 
   const handleRowClick = (beneficiary) => {
@@ -37,10 +19,7 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {  const [selec
   const handleDataUploaded = (uploadedData) => {
     const newBeneficiaries = uploadedData.map(beneficiary => ({
       ...beneficiary,
-      familyMembers: [
-        { id: `${beneficiary.id}-1`, name: beneficiary.familyMember1Name, relation: beneficiary.familyMember1Relation },
-        { id: `${beneficiary.id}-2`, name: beneficiary.familyMember2Name, relation: beneficiary.familyMember2Relation },
-      ].filter(member => member.name && member.relation),
+      familyMembers: beneficiary.familyMembers ? JSON.parse(beneficiary.familyMembers) : [],
       lastActivity: {
         type: beneficiary.lastActivityType,
         date: beneficiary.lastActivityDate,
@@ -72,11 +51,10 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {  const [selec
             <tr className="bg-gray-200">
               <th className="py-2 px-4 border-b">ID</th>
               <th className="py-2 px-4 border-b">Name</th>
-              <th className="py-2 px-4 border-b">Date of Birth</th>
-              <th className="py-2 px-4 border-b">Gender</th>
               <th className="py-2 px-4 border-b">Nationality</th>
               <th className="py-2 px-4 border-b">Beneficiary Type</th>
-              <th className="py-2 px-4 border-b">Last Activity</th>
+              <th className="py-2 px-4 border-b">Registration Date</th>
+              <th className="py-2 px-4 border-b">Branch</th>
             </tr>
           </thead>
           <tbody>
@@ -88,11 +66,10 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {  const [selec
               >
                 <td className="py-2 px-4 border-b">{beneficiary.id}</td>
                 <td className="py-2 px-4 border-b">{beneficiary.name}</td>
-                <td className="py-2 px-4 border-b">{beneficiary.dateOfBirth}</td>
-                <td className="py-2 px-4 border-b">{beneficiary.gender}</td>
                 <td className="py-2 px-4 border-b">{beneficiary.nationality}</td>
                 <td className="py-2 px-4 border-b">{beneficiary.beneficiaryType}</td>
-                <td className="py-2 px-4 border-b">{beneficiary.lastActivity.type}</td>
+                <td className="py-2 px-4 border-b">{beneficiary.registrationDate}</td>
+                <td className="py-2 px-4 border-b">{beneficiary.branch}</td>
               </tr>
             ))}
           </tbody>
@@ -108,16 +85,24 @@ const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {  const [selec
               <p><strong>Name:</strong> {selectedBeneficiary.name}</p>
               <p><strong>Date of Birth:</strong> {selectedBeneficiary.dateOfBirth}</p>
               <p><strong>Gender:</strong> {selectedBeneficiary.gender}</p>
-            </div>
-            <div>
               <p><strong>Nationality:</strong> {selectedBeneficiary.nationality}</p>
               <p><strong>Beneficiary Type:</strong> {selectedBeneficiary.beneficiaryType}</p>
+              <p><strong>Temporary Protection Number:</strong> {selectedBeneficiary.temporaryProtectionNumber || 'N/A'}</p>
+              <p><strong>Registration Date:</strong> {selectedBeneficiary.registrationDate}</p>
+              <p><strong>Branch:</strong> {selectedBeneficiary.branch}</p>
+            </div>
+            <div>
+              <p><strong>Education Level:</strong> {selectedBeneficiary.educationLevel}</p>
+              <p><strong>Occupation:</strong> {selectedBeneficiary.occupation}</p>
+              <p><strong>Vulnerability:</strong> {selectedBeneficiary.vulnerability}</p>
+              <p><strong>Household Size:</strong> {selectedBeneficiary.householdSize}</p>
+              <p><strong>Income Level:</strong> {selectedBeneficiary.incomeLevel}</p>
             </div>
           </div>
           <h3 className="text-xl font-semibold mt-4 mb-2">Family Members</h3>
           <ul className="list-disc pl-5 mb-4">
-            {selectedBeneficiary.familyMembers.map(member => (
-              <li key={member.id}>{member.name} - {member.relation}</li>
+            {selectedBeneficiary.familyMembers.map((member, index) => (
+              <li key={index}>{member.name} - {member.relation}</li>
             ))}
           </ul>
           <h3 className="text-xl font-semibold mt-4 mb-2">Last Activity</h3>
