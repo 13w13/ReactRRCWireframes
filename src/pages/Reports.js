@@ -4,8 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import SimpleMap from '../components/SimpleMap';
 
 
-const Reports = ({ projects, activities, beneficiaries, locations }) => {
-  const [selectedProject, setSelectedProject] = useState('');
+const Reports = ({ projects, activities, beneficiaries, locations }) => {  const [selectedProject, setSelectedProject] = useState('');
   const [startDate, setStartDate] = useState('2023-01-01');
   const [endDate, setEndDate] = useState('2023-12-31');
   const [reportData, setReportData] = useState(null);

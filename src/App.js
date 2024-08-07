@@ -8,12 +8,13 @@ import Reports from './pages/Reports';
 import DataIntegrationStatus from './pages/DataIntegrationStatus';
 
 // Import mock data
-import { beneficiaries as mockBeneficiaries, activities as mockActivities, projects as mockProjects } from './data/mockData';
+import { beneficiaries as mockBeneficiaries, activities as mockActivities, projects as mockProjects, locations as mockLocations } from './data/mockData';
 
 const App = () => {
   const [beneficiaries, setBeneficiaries] = useState([]);
   const [activities, setActivities] = useState([]);
   const [projects, setProjects] = useState({});
+  const [locations, setLocations] = useState([]);
 
   useEffect(() => {
     // Simulate async data loading
@@ -23,6 +24,7 @@ const App = () => {
       setBeneficiaries(mockBeneficiaries);
       setActivities(mockActivities);
       setProjects(mockProjects);
+      setLocations(mockLocations);
     };
 
     loadData();
@@ -37,11 +39,11 @@ const App = () => {
         </div>
         <div className="flex-1 overflow-y-auto">
           <Routes>
-            <Route path="/" element={<Overview beneficiaries={beneficiaries} activities={activities} projects={projects} />} />
+            <Route path="/" element={<Overview beneficiaries={beneficiaries} activities={activities} projects={projects} locations={locations} />} />
             <Route path="/beneficiaries" element={<BeneficiaryInfo beneficiaries={beneficiaries} setBeneficiaries={setBeneficiaries} />} />
             <Route path="/activities" element={<ActivitiesTable activities={activities} setActivities={setActivities} />} />
             <Route path="/projects" element={<ProjectManagement projects={projects} setProjects={setProjects} />} />
-            <Route path="/reports" element={<Reports projects={projects} activities={activities} beneficiaries={beneficiaries} />} />
+            <Route path="/reports" element={<Reports projects={projects} activities={activities} beneficiaries={beneficiaries} locations={locations} />} />
             <Route path="/data-integration" element={<DataIntegrationStatus />} />
           </Routes>
         </div>

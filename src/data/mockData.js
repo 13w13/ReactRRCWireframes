@@ -43,8 +43,14 @@ const generateActivities = (beneficiaries, numActivities) => {
     'MHPSS Session', 
     'Livelihood Support'
   ];
-  const locations = ['Bucharest Branch', 'Cluj-Napoca Branch', 'Iasi Branch', 'Constanta Branch', 'Mobile Clinic'];
-  
+  const locations = [
+    { name: 'Bucharest Branch', latitude: 44.4268, longitude: 26.1025 },
+    { name: 'Cluj-Napoca Branch', latitude: 46.7712, longitude: 23.6236 },
+    { name: 'Iasi Branch', latitude: 47.1585, longitude: 27.6014 },
+    { name: 'Timisoara Branch', latitude: 45.7489, longitude: 21.2087 },
+    { name: 'Constanta Branch', latitude: 44.1598, longitude: 28.6348 },
+    { name: 'Mobile Clinic', latitude: 45.9432, longitude: 24.9668 }, // Center of Romania as default
+  ];  
   const sourceSystemMap = {
     'Cash Assistance': 'Access RC',
     'Health Consultation': 'Easy Medical',

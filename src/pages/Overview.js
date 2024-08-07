@@ -2,8 +2,7 @@ import React from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import SimpleMap from '../components/SimpleMap';
 
-const Overview = ({ beneficiaries, activities, projects, locations }) => {
-  const totalBeneficiaries = beneficiaries.length;
+const Overview = ({ beneficiaries, activities, projects, locations }) => {  const totalBeneficiaries = beneficiaries.length;
   const totalActivities = activities.length;
   const totalProjects = Object.values(projects).flat().length;
 
