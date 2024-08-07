@@ -1,58 +1,85 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import SimpleMap from '../components/SimpleMap';
 
-const Overview = ({ beneficiaries, activities, projects, locations }) => {  const totalBeneficiaries = beneficiaries.length;
+const Overview = ({ beneficiaries, activities, projects, locations }) => {
+  const totalBeneficiaries = beneficiaries.length;
   const totalActivities = activities.length;
   const totalProjects = Object.values(projects).flat().length;
 
+  const uniquePeopleReached = useMemo(() => {
+    const uniqueBeneficiaries = new Set(activities.map(activity => activity.beneficiaryId));
+    return uniqueBeneficiaries.size;
+  }, [activities]);
+
   // Prepare data for the activities and beneficiaries chart
-  const chartData = activities.reduce((acc, activity) => {
-    const date = activity.date.slice(0, 7); // Get YYYY-MM
-    const existingEntry = acc.find(entry => entry.month === date);
-    if (existingEntry) {
-      existingEntry.activities++;
-      if (!existingEntry.beneficiaries.includes(activity.beneficiaryId)) {
-        existingEntry.beneficiaries.push(activity.beneficiaryId);
+  const chartData = useMemo(() => {
+    return activities.reduce((acc, activity) => {
+      const date = activity.date.slice(0, 7); // Get YYYY-MM
+      const existingEntry = acc.find(entry => entry.month === date);
+      if (existingEntry) {
+        existingEntry.activities++;
+        if (!existingEntry.beneficiaries.has(activity.beneficiaryId)) {
+          existingEntry.beneficiaries.add(activity.beneficiaryId);
+        }
+      } else {
+        acc.push({ 
+          month: date, 
+          activities: 1, 
+          beneficiaries: new Set([activity.beneficiaryId])
+        });
       }
-    } else {
-      acc.push({ month: date, activities: 1, beneficiaries: [activity.beneficiaryId] });
-    }
-    return acc;
-  }, []).map(entry => ({
-    ...entry,
-    beneficiaries: entry.beneficiaries.length,
-  })).sort((a, b) => a.month.localeCompare(b.month));
+      return acc;
+    }, []).map(entry => ({
+      month: entry.month,
+      activities: entry.activities,
+      beneficiaries: entry.beneficiaries.size,
+    })).sort((a, b) => a.month.localeCompare(b.month));
+  }, [activities]);
 
   // Prepare data for beneficiary type distribution
-  const beneficiaryTypeData = beneficiaries.reduce((acc, beneficiary) => {
-    acc[beneficiary.beneficiaryType] = (acc[beneficiary.beneficiaryType] || 0) + 1;
-    return acc;
-  }, {});
-
-  const beneficiaryTypePieData = Object.entries(beneficiaryTypeData).map(([name, value]) => ({ name, value }));
+  const beneficiaryTypeData = useMemo(() => {
+    const distribution = beneficiaries.reduce((acc, beneficiary) => {
+      acc[beneficiary.beneficiaryType] = (acc[beneficiary.beneficiaryType] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(distribution).map(([name, value]) => ({ name, value }));
+  }, [beneficiaries]);
 
   // Prepare data for project progress
-  const projectProgressData = Object.entries(projects).map(([projectName, projectDetails]) => ({
-    name: projectName,
-    target: projectDetails.reduce((sum, project) => sum + project.target.value, 0),
-    achieved: projectDetails.reduce((sum, project) => 
-      sum + project.monthlyProgress.reduce((total, month) => total + month.count, 0), 0)
-  }));
+  const projectProgressData = useMemo(() => {
+    return Object.entries(projects).map(([projectName, projectDetails]) => ({
+      name: projectName,
+      target: projectDetails.reduce((sum, project) => sum + project.target.value, 0),
+      achieved: projectDetails.reduce((sum, project) => 
+        sum + project.monthlyProgress.reduce((total, month) => total + month.count, 0), 0)
+    }));
+  }, [projects]);
 
   // Prepare data for location-based distribution
-  const locationDistribution = activities.reduce((acc, activity) => {
-    const location = locations.find(l => l.name === activity.location);
-    if (location) {
-      if (!acc[location.name]) {
-        acc[location.name] = {
-          count: 0,
-          latitude: location.latitude,
-          longitude: location.longitude
-        };
+  const locationDistribution = useMemo(() => {
+    return activities.reduce((acc, activity) => {
+      const location = locations.find(l => l.name === activity.location);
+      if (location) {
+        if (!acc[location.name]) {
+          acc[location.name] = {
+            count: new Set(),
+            latitude: location.latitude,
+            longitude: location.longitude
+          };
+        }
+        acc[location.name].count.add(activity.beneficiaryId);
       }
-      acc[location.name].count++;
-    }
+      return acc;
+    }, {});
+  }, [activities, locations]);
+
+  // Convert Set to size for the map
+  const mapLocationDistribution = Object.entries(locationDistribution).reduce((acc, [name, data]) => {
+    acc[name] = {
+      ...data,
+      count: data.count.size
+    };
     return acc;
   }, {});
 
@@ -99,7 +126,7 @@ const Overview = ({ beneficiaries, activities, projects, locations }) => {  cons
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={beneficiaryTypePieData}
+                data={beneficiaryTypeData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
@@ -108,7 +135,7 @@ const Overview = ({ beneficiaries, activities, projects, locations }) => {  cons
                 dataKey="value"
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
               >
-                {beneficiaryTypePieData.map((entry, index) => (
+                {beneficiaryTypeData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -137,7 +164,7 @@ const Overview = ({ beneficiaries, activities, projects, locations }) => {  cons
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Geographic Distribution of Beneficiaries</h2>
         <div style={{ height: '400px', width: '100%' }}>
-          <SimpleMap locationDistribution={locationDistribution} />
+          <SimpleMap locationDistribution={mapLocationDistribution} />
         </div>
       </div>
     </div>

@@ -19,7 +19,6 @@ const App = () => {
   useEffect(() => {
     // Simulate async data loading
     const loadData = async () => {
-      // Add a small delay to simulate network request
       await new Promise(resolve => setTimeout(resolve, 100));
       setBeneficiaries(mockBeneficiaries);
       setActivities(mockActivities);
@@ -35,20 +34,20 @@ const App = () => {
       <div className="flex h-screen">
         {/* Sidebar navigation */}
         <div className="w-64 bg-gray-900 text-white">
-          <div className="p-4">
-            <h1 className="text-2xl font-bold mb-2 text-red-600">Romanian Red Cross</h1>
-            <h2 className="text-lg mb-6 text-gray-400">Unified Beneficiary System</h2>
-            <nav>
-              <ul>
-                <li className="mb-2"><Link to="/" className="block py-2 px-4 hover:bg-gray-800 text-gray-300 hover:text-white">Overview</Link></li>
-                <li className="mb-2"><Link to="/beneficiaries" className="block py-2 px-4 hover:bg-gray-800 text-gray-300 hover:text-white">Beneficiaries</Link></li>
-                <li className="mb-2"><Link to="/activities" className="block py-2 px-4 hover:bg-gray-800 text-gray-300 hover:text-white">Activities</Link></li>
-                <li className="mb-2"><Link to="/reports" className="block py-2 px-4 hover:bg-gray-800 text-gray-300 hover:text-white">Reports</Link></li>
-                <li className="mb-2"><Link to="/projects" className="block py-2 px-4 hover:bg-gray-800 text-gray-300 hover:text-white">Project Management</Link></li>
-                <li className="mb-2"><Link to="/data-integration" className="block py-2 px-4 hover:bg-gray-800 text-gray-300 hover:text-white">Data Integration</Link></li>
-              </ul>
-            </nav>
+          <div className="bg-red-600 p-4">
+            <h1 className="text-2xl font-bold">Romanian Red Cross</h1>
+            <h2 className="text-lg">Unified Beneficiary System</h2>
           </div>
+          <nav className="mt-4">
+            <ul>
+              <li><Link to="/" className="block py-2 px-4 hover:bg-gray-800">Overview</Link></li>
+              <li><Link to="/beneficiaries" className="block py-2 px-4 hover:bg-gray-800">Beneficiaries</Link></li>
+              <li><Link to="/activities" className="block py-2 px-4 hover:bg-gray-800">Activities</Link></li>
+              <li><Link to="/reports" className="block py-2 px-4 hover:bg-gray-800">Reports</Link></li>
+              <li><Link to="/projects" className="block py-2 px-4 hover:bg-gray-800">Project Management</Link></li>
+              <li><Link to="/data-integration" className="block py-2 px-4 hover:bg-gray-800">Data Integration</Link></li>
+            </ul>
+          </nav>
         </div>
         <div className="flex-1 overflow-y-auto">
           <Routes>
