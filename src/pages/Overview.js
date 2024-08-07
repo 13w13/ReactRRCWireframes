@@ -140,7 +140,7 @@ const Overview = ({ beneficiaries, activities, projects, locations }) => {
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
   <h2 className="text-2xl font-bold text-gray-800 mb-4">Geographic Distribution of Beneficiaries</h2>
   <div style={{ height: '400px', width: '100%' }}>
-    <DynamicMap locationDistribution={locationDistribution} />
+    <Map locationDistribution={locationDistribution} />
   </div>
 </div>
     </div>
