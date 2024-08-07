@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as XLSX from 'xlsx';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import dynamic from 'next/dynamic';
+import Map from '../components/Map';
 
 const DynamicMap = dynamic(() => import('./Map'), {
   ssr: false

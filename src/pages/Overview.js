@@ -2,7 +2,7 @@ import React from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import dynamic from 'next/dynamic';
+import Map from '../components/Map';
 
 const DynamicMap = dynamic(() => import('./Map'), {
   ssr: false
