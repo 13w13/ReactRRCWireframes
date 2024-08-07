@@ -234,10 +234,10 @@ const generateMockupData = (numBeneficiaries = 1000, numActivities = 5000) => {
   // Simulate project progress
   simulateProjectProgress(projects, activities);
 
-  return { beneficiaries, activities, projects, locations };
+  return { beneficiaries, activities, projects };
 };
 
 // Generate the mockup data
-const { beneficiaries, activities, projects, locations } = generateMockupData();
+const { beneficiaries, activities, projects } = generateMockupData();
 
 export { beneficiaries, activities, projects, locations };
