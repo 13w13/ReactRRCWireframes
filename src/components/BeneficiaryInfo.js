@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import DataUpload from './DataUpload';
 
+
+
 const initialBeneficiaries = [
   {
     id: 'B12345',
@@ -25,8 +27,7 @@ const beneficiaryTemplateFields = [
   'lastActivityType', 'lastActivityDate', 'lastActivityLocation'
 ];
 
-const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {
-  const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
+const BeneficiaryInfo = ({ beneficiaries, setBeneficiaries }) => {  const [selectedBeneficiary, setSelectedBeneficiary] = useState(null);
   const [uploadLogs, setUploadLogs] = useState([]);
 
   const handleRowClick = (beneficiary) => {

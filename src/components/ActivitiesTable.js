@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import DataUpload from './DataUpload';
 
-const ActivitiesTable = ({ activities, setActivities }) => {
+const ActivitiesTable = ({ activities, setActivities }) => {  
   const [newActivity, setNewActivity] = useState({
     beneficiaryId: '',
     name: '',
