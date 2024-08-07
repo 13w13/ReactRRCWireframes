@@ -8,6 +8,16 @@ const formatDate = (date) => {
   return date.toISOString().split('T')[0];
 };
 
+// Define locations once, with both name and coordinates
+const locations = [
+  { name: 'Bucharest Branch', latitude: 44.4268, longitude: 26.1025 },
+  { name: 'Cluj-Napoca Branch', latitude: 46.7712, longitude: 23.6236 },
+  { name: 'Iasi Branch', latitude: 47.1585, longitude: 27.6014 },
+  { name: 'Timisoara Branch', latitude: 45.7489, longitude: 21.2087 },
+  { name: 'Constanta Branch', latitude: 44.1598, longitude: 28.6348 },
+  { name: 'Mobile Clinic', latitude: 45.9432, longitude: 24.9668 }, // Center of Romania as default
+];
+
 // Function to create family relationships
 const createFamilyRelationships = (beneficiaries) => {
   const familySize = [1, 2, 3, 4, 5]; // Possible family sizes
@@ -43,14 +53,6 @@ const generateActivities = (beneficiaries, numActivities) => {
     'MHPSS Session', 
     'Livelihood Support'
   ];
-  const locations = [
-    { name: 'Bucharest Branch', latitude: 44.4268, longitude: 26.1025 },
-    { name: 'Cluj-Napoca Branch', latitude: 46.7712, longitude: 23.6236 },
-    { name: 'Iasi Branch', latitude: 47.1585, longitude: 27.6014 },
-    { name: 'Timisoara Branch', latitude: 45.7489, longitude: 21.2087 },
-    { name: 'Constanta Branch', latitude: 44.1598, longitude: 28.6348 },
-    { name: 'Mobile Clinic', latitude: 45.9432, longitude: 24.9668 }, // Center of Romania as default
-  ];
 
   const sourceSystemMap = {
     'Cash Assistance': 'Access RC',
@@ -69,13 +71,14 @@ const generateActivities = (beneficiaries, numActivities) => {
     const beneficiary = beneficiaries[beneficiaryIndex];
     const activityType = activityTypes[Math.floor(Math.random() * activityTypes.length)];
     const activityDate = formatDate(randomDate(new Date(2023, 0, 1), new Date()));
+    const location = locations[Math.floor(Math.random() * locations.length)];
     activities.push({
       id: i + 1,
       beneficiaryId: beneficiary.id,
       name: beneficiary.name,
       activityType: activityType,
       date: activityDate,
-      location: locations[Math.floor(Math.random() * locations.length)],
+      location: location.name,
       source: sourceSystemMap[activityType]
     });
   }
@@ -133,7 +136,6 @@ const simulateProjectProgress = (projects, activities) => {
 const generateMockupData = (numBeneficiaries = 1000, numActivities = 5000) => {
   const beneficiaryTypes = ['Refugee', 'IDP', 'Host Community', 'Returnee'];
   const nationalities = ['Ukrainian', 'Syrian', 'Afghan', 'Romanian', 'Moldovan'];
-  const locations = ['Bucharest Branch', 'Cluj-Napoca Branch', 'Iasi Branch', 'Constanta Branch', 'Mobile Clinic'];
   const educationLevels = ['None', 'Primary', 'Secondary', 'Tertiary'];
   const occupations = ['Unemployed', 'Student', 'Agriculture', 'Trade', 'Professional', 'Retired'];
   const vulnerabilities = ['Disability', 'Chronic Illness', 'Single Parent', 'Elderly', 'None'];
@@ -149,7 +151,7 @@ const generateMockupData = (numBeneficiaries = 1000, numActivities = 5000) => {
     temporaryProtectionNumber: `TP${String(Math.floor(Math.random() * 1000000)).padStart(6, '0')}`,
     familyMembers: [],
     registrationDate: formatDate(randomDate(new Date(2022, 0, 1), new Date())),
-    branch: locations[Math.floor(Math.random() * locations.length)],
+    branch: locations[Math.floor(Math.random() * locations.length)].name,
     educationLevel: educationLevels[Math.floor(Math.random() * educationLevels.length)],
     occupation: occupations[Math.floor(Math.random() * occupations.length)],
     vulnerability: vulnerabilities[Math.floor(Math.random() * vulnerabilities.length)],
@@ -189,7 +191,7 @@ const generateMockupData = (numBeneficiaries = 1000, numActivities = 5000) => {
         name: 'People reached with employability Support',
         target: { value: 1000, description: 'People supported' },
         linkedActivities: ['Livelihood Support', 'Language Class'],
-        locations: locations,
+        locations: locations.map(l => l.name),
         beneficiaryTypes: beneficiaryTypes,
         nationalities: nationalities,
         calculationMethod: 'Count of unique beneficiaries receiving employability support'
@@ -199,7 +201,7 @@ const generateMockupData = (numBeneficiaries = 1000, numActivities = 5000) => {
         name: 'People reached with MHPSS',
         target: { value: 500, description: 'People receiving psychosocial support' },
         linkedActivities: ['MHPSS Session'],
-        locations: locations,
+        locations: locations.map(l => l.name),
         beneficiaryTypes: beneficiaryTypes,
         nationalities: nationalities,
         calculationMethod: 'Count of unique beneficiaries attending MHPSS sessions'
@@ -211,17 +213,17 @@ const generateMockupData = (numBeneficiaries = 1000, numActivities = 5000) => {
         name: 'People reached with food assistance',
         target: { value: 5000, description: 'People receiving food assistance' },
         linkedActivities: ['Food Distribution'],
-        locations: locations,
+        locations: locations.map(l => l.name),
         beneficiaryTypes: beneficiaryTypes,
         nationalities: ['Ukrainian'],
         calculationMethod: 'Count of unique beneficiaries receiving food assistance'
       },
       {
         id: 'ukr2',
-        name: 'People reached with health activties',
+        name: 'People reached with health activities',
         target: { value: 2000, description: 'Health consultations provided' },
         linkedActivities: ['Health Consultation'],
-        locations: locations,
+        locations: locations.map(l => l.name),
         beneficiaryTypes: beneficiaryTypes,
         nationalities: nationalities,
         calculationMethod: 'Sum of all health consultations provided'
@@ -236,10 +238,6 @@ const generateMockupData = (numBeneficiaries = 1000, numActivities = 5000) => {
 };
 
 // Generate the mockup data
-const { beneficiaries, activities, projects } = generateMockupData();
+const { beneficiaries, activities, projects, locations } = generateMockupData();
 
 export { beneficiaries, activities, projects, locations };
-          
-
-
-          
