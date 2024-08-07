@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import DataUpload from './DataUpload';
+import React, { useState, useEffect } from 'react';
+import DataUpload from '../components/DataUpload';
 
-const ActivitiesTable = ({ activities, setActivities }) => {  
+const ActivitiesTable = ({ activities, setActivities }) => {
   const [newActivity, setNewActivity] = useState({
     beneficiaryId: '',
     name: '',
@@ -12,6 +12,8 @@ const ActivitiesTable = ({ activities, setActivities }) => {
   });
   const [uploadLogs, setUploadLogs] = useState([]);
   const [filter, setFilter] = useState({ activityType: '', location: '', source: '' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -21,6 +23,7 @@ const ActivitiesTable = ({ activities, setActivities }) => {
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilter(prev => ({ ...prev, [name]: value }));
+    setCurrentPage(1);
   };
 
   const handleAddActivity = () => {
@@ -58,6 +61,13 @@ const ActivitiesTable = ({ activities, setActivities }) => {
     (!filter.source || activity.source === filter.source)
   );
 
+  const paginatedActivities = filteredActivities.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredActivities.length / itemsPerPage);
+
   return (
     <div className="p-4 bg-gray-100">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Activities Monitoring</h1>
@@ -68,6 +78,7 @@ const ActivitiesTable = ({ activities, setActivities }) => {
         dataType="Activities"
       />
 
+      {/* Add New Activity Form */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Add New Activity</h2>
         <div className="grid grid-cols-3 gap-4 mb-4">
@@ -122,6 +133,7 @@ const ActivitiesTable = ({ activities, setActivities }) => {
         <button onClick={handleAddActivity} className="bg-blue-500 text-white px-4 py-2 rounded">Add Activity</button>
       </div>
 
+      {/* Filter Activities */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Filter Activities</h2>
         <div className="grid grid-cols-3 gap-4 mb-4">
@@ -161,6 +173,7 @@ const ActivitiesTable = ({ activities, setActivities }) => {
         </div>
       </div>
 
+      {/* Activities List */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Activities List</h2>
         <table className="w-full">
@@ -175,7 +188,7 @@ const ActivitiesTable = ({ activities, setActivities }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredActivities.map(activity => (
+            {paginatedActivities.map(activity => (
               <tr key={activity.id} className="border-b">
                 <td className="p-2">{activity.beneficiaryId}</td>
                 <td className="p-2">{activity.name}</td>
@@ -187,8 +200,27 @@ const ActivitiesTable = ({ activities, setActivities }) => {
             ))}
           </tbody>
         </table>
+        {/* Pagination */}
+        <div className="mt-4 flex justify-between items-center">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
+          >
+            Previous
+          </button>
+          <span>{currentPage} of {totalPages}</span>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
+          >
+            Next
+          </button>
+        </div>
       </div>
 
+      {/* Upload Logs */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Upload Logs</h2>
         <table className="w-full">
@@ -200,7 +232,7 @@ const ActivitiesTable = ({ activities, setActivities }) => {
             </tr>
           </thead>
           <tbody>
-          {uploadLogs.map((log, index) => (
+            {uploadLogs.map((log, index) => (
               <tr key={index} className="border-b">
                 <td className="p-2">{log.timestamp}</td>
                 <td className="p-2">{log.count}</td>
