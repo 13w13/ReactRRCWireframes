@@ -21,11 +21,30 @@ const Reports = ({ projects, activities, beneficiaries, locations }) => {
   const [endDate, setEndDate] = useState('2023-12-31');
   const [reportData, setReportData] = useState(null);
 
-  useEffect(() => {
-    if (selectedProject) {
-      generateReportData();
-    }
-  }, [selectedProject, startDate, endDate]);
+  const Reports = ({ projects, activities, beneficiaries, locations }) => {
+    const [selectedProject, setSelectedProject] = useState('');
+    const [startDate, setStartDate] = useState('2023-01-01');
+    const [endDate, setEndDate] = useState('2023-12-31');
+    const [reportData, setReportData] = useState(null);
+    const [error, setError] = useState(null);
+  
+    useEffect(() => {
+      console.log('Projects:', projects);
+      console.log('Activities:', activities);
+      console.log('Beneficiaries:', beneficiaries);
+      console.log('Locations:', locations);
+    }, [projects, activities, beneficiaries, locations]);
+  
+    useEffect(() => {
+      if (selectedProject) {
+        try {
+          generateReportData();
+        } catch (err) {
+          console.error('Error generating report data:', err);
+          setError('An error occurred while generating the report. Please try again.');
+        }
+      }
+    }, [selectedProject, startDate, endDate]);
 
   const generateReportData = () => {
     if (!selectedProject || !projects[selectedProject]) return;

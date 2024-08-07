@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DataUpload from './DataUpload';
 
 const ActivitiesTable = ({ activities, setActivities, beneficiaries, locations, activityTypes }) => {
@@ -10,6 +10,17 @@ const ActivitiesTable = ({ activities, setActivities, beneficiaries, locations, 
   });
   const [uploadLogs, setUploadLogs] = useState([]);
   const [filter, setFilter] = useState({ activityType: '', location: '' });
+
+  useEffect(() => {
+    console.log('Activities:', activities);
+    console.log('Beneficiaries:', beneficiaries);
+    console.log('Locations:', locations);
+    console.log('Activity Types:', activityTypes);
+  }, [activities, beneficiaries, locations, activityTypes]);
+
+  if (!activities || !beneficiaries || !locations || !activityTypes) {
+    return <div>Loading activities data...</div>;
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
