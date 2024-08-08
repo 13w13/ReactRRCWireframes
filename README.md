@@ -50,6 +50,8 @@ The Unified Beneficiary System aims to showcase a potential solution for integra
 ├── README.md
 └── LICENSE
 
+```
+
 ## Getting Started
 
 1. Clone the repository
