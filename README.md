@@ -20,6 +20,7 @@ The Unified Beneficiary System aims to showcase a potential solution for integra
 
 ## Repository Structure
 
+```
 /
 ├── src/
 │   ├── components/
